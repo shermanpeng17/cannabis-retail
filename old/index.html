@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no"/>
+    <title>Cannabis Retail Zones</title>
+    <meta name="description" content="Cannabis Retail 'Green Zones' - zones where retail cannabis may be permitted.">
+    <meta name="author" content="Mike Wynne and Jonathan Engelbert, Planning Department, City and County of San Francisco">
+    <link rel="stylesheet" href="https://js.arcgis.com/3.24/esri/css/esri.css">
+    <link rel="stylesheet" href="jQuery/Messi-master/messi.min.css" />
+    <style>
+      html, body, #map {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        text-align: center;
+      }
+      #BasemapToggle {
+	      position: absolute;
+	      top: 20px;
+	      right: 20px;
+	      z-index: 50;
+      }
+      #searchbox {
+	position:absolute;
+	top:20px;
+	      display: inline-block;
+	      left:25%;
+	      z-index: 100;
+	      width: 50%;
+	      text-align: center;
+      }
+      #addressInput {
+	      font-size: 16px;
+	      height:30px;
+	      width:100%;
+      }
+      
+      #checkboxes {
+		display: block;
+		position: absolute;
+		z-index: 2;
+		top: 100px;
+		left: 20px;
+		background-color: white;
+		box-shadow: black 1px;
+		border: 1px solid navy;
+		padding: 8px;
+		border-radius: 5px;
+		font-family:Tahoma, Geneva, sans-serif;
+		font-size: 14px;
+		text-align: left;
+		}
+		
+	#legend {
+		position: fixed;
+		bottom: 20px;
+		left: 20px;
+		z-index: 1;
+		background-color: white;
+		box-shadow: black 1px;
+		border: 1px solid navy;
+		padding: 5px;
+		border-radius: 5px;
+		font-family:Tahoma, Geneva, sans-serif;
+		font-size: 15px;
+		text-align: left;
+        }
+      @media screen and (max-width: 400px){
+		#checkboxes{
+			width: 60%;
+			top: 85px;
+			left: 10px;
+			margin: 0 auto;
+		}
+		#BasemapToggle {
+			visibility: hidden;
+		}
+		#legend {
+			left: 5px;
+			bottom: 5px;
+		}
+      }
+      
+    
+
+    </style>
+    <script src="https://js.arcgis.com/3.24/"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="jQuery/Messi-master/messi.min.js"></script>
+    <script>
+      var map;
+      var lastCall = 0;
+      var symbol;
+      var renderer;
+      var graphic;
+      var polygonSymbol;
+      var thetemplayer;
+      var imageParameters;
+      var identifyTask;
+      var identifyTaskPoly;
+      var identifyParams;
+      var identifyParamsPoly;
+      var popup;
+      var dynamicMapServiceLayer;
+      var theServerName = window.location.host;
+      
+
+      function checkMob(a) {
+		var check = false;
+		if (/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino|android|ipad|playbook|silk/i.test(a)||/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0,4)))check = true
+		return check;
+	}
+
+      function throttleSubmit(myAdd) {
+		//limits the searches to once every 3 seconds, otherwise they can stack up
+		if (new Date() - lastCall < 3000) {
+			return false;
+		} else {
+			//console.log("run search")
+			lastCall = new Date();
+			showAddress(myAdd)
+		}
+	}
+	function showAddress(address) {
+		//console.log(address)
+		geocodeSF(address)
+
+	}
+	function geocodeSF(address) {
+	//runs an ajax call to the geocoder.  sends the search string and receives back json representing the found feature.
+		//remove the previous search results, if there are any
+		if (thetemplayer) {
+			map.removeLayer(thetemplayer)
+		}
+		var url= "//sfplanninggis.org/cpc_geocode/"
+		$.ajax({
+                    url: url,
+                    dataType: 'json',
+                    data: {
+                        search: address
+                    },
+                    success: function(data) {
+			//console.log("SUCCESS")
+                        if (data['error']) {
+                            console.error('Geocode failed: ' + data['error'].message);
+                            return;
+                        }
+                        if (data.features && data.features.length > 0) {
+				//if there are found features add them to the map
+				//console.log(data)
+				addTempLayer(data)
+				
+                        } else {
+                            alert("Sorry, I can't find "+address+".  ")
+                        }
+                    },
+                    error: function() {
+				console.log("Error")
+				//self.geocodeSuccess(false);
+				alert("Sorry, there has been an error.  If this continues please email mike.wynne@sfgov.org and include the website's URL and what you searched for.")
+                    },
+                    complete: function() {
+				//self.geocodeLoading(false);
+				//console.log("finished")
+                    }
+                });
+
+
+	}
+	
+      require([
+	"esri/map",
+	"esri/layers/ArcGISDynamicMapServiceLayer",
+	"esri/layers/ArcGISImageServiceLayer",
+	"esri/layers/ImageServiceParameters",
+	"esri/InfoTemplate",
+	"esri/symbols/SimpleFillSymbol",
+	"esri/symbols/SimpleLineSymbol",
+	"esri/tasks/IdentifyTask",
+	"esri/tasks/IdentifyParameters",
+	"esri/dijit/Popup",
+	"esri/layers/FeatureLayer",
+	"esri/tasks/query",
+	"dojo/_base/array",
+	"esri/Color",
+	"esri/layers/ImageParameters",
+	"esri/dijit/BasemapToggle",
+	"esri/renderers/SimpleRenderer",
+	"dojo/dom-construct",
+	"dojo/dom",
+	"dojo/on",
+	"dojo/query",
+	"dojo/domReady!"
+	
+	
+      ], function (
+        Map, ArcGISDynamicMapServiceLayer, ArcGISImageServiceLayer, ImageServiceParameters,InfoTemplate, SimpleFillSymbol,
+        SimpleLineSymbol, IdentifyTask, IdentifyParameters, Popup, FeatureLayer, Query,
+        arrayUtils, Color, ImageParameters, BasemapToggle, SimpleRenderer, domConstruct, dom, on, query, domReady
+      ) {
+	
+	//Setup for checkboxes
+	var layer; 
+	var visibleLayerIds = []; 
+	
+	popup = new Popup({
+	fillSymbol: new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
+	new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
+	      new Color([255, 0, 0]), 2), new Color([255, 255, 0, 0.25]))
+	}, domConstruct.create("div"));
+
+	map = new Map("map", {
+		 basemap: "gray-vector",
+		center: [-122.45, 37.76],
+		zoom: 12,
+		infoWindow: popup
+	});
+
+	map.on("load", mapReady);
+	map.disableKeyboardNavigation()
+
+	imageParameters = new ImageParameters();
+	imageParameters.layerIds = [0,1,14,15,16];
+	imageParameters.layerOption = ImageParameters.LAYER_OPTION_SHOW;
+	dynamicMapServiceLayer = new ArcGISDynamicMapServiceLayer("//" + theServerName + "/arcgiswa/rest/services/CannabisRetail/MapServer", {
+		"opacity" : 0.75,
+		"imageParameters" : imageParameters
+        });
+	map.addLayer(dynamicMapServiceLayer);
+	map.addLayer(layer);
+	//identifyTask = new IdentifyTask(dynamicMapServiceLayer);
+	
+	on(dom.byId("layer0CheckBox"), "change", updateLayerVisibility);
+          on(dom.byId("layer1CheckBox"), "change", updateLayerVisibility);
+	on(dom.byId("layer2CheckBox"), "change", updateLayerVisibility);
+	on(dom.byId("layer3CheckBox"), "change", updateLayerVisibility);
+	on(dom.byId("layer4CheckBox"), "change", updateLayerVisibility);
+	on(dom.byId("layer5CheckBox"), "change", updateLayerVisibility);
+	
+	var params = new ImageServiceParameters();
+    params.noData = 0;
+    var imageServiceLayer = new ArcGISImageServiceLayer("https://sfgis-portal.sfgov.org/img/rest/services/wm84_3857_/wm84_P2017_rgb76mm/ImageServer", {
+        imageServiceParameters: params,
+        opacity: 0.75
+    });
+          
+	
+	var toggle = new BasemapToggle({
+		map: map,
+		basemap: "satellite"
+		}, "BasemapToggle");
+	toggle.startup();
+
+
+	symbol = new esri.symbol.SimpleFillSymbol(esri.symbol.SimpleFillSymbol.STYLE_SOLID, new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID, new dojo.Color([0,0,255]), 4), new dojo.Color([0,0,0,0.25]));
+	renderer = new SimpleRenderer(symbol);
+	var popup = new Popup({
+          fillSymbol: new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
+		new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
+		new Color([255, 0, 0]), 2), new Color([255, 255, 0, 0.25]))
+		}, domConstruct.create("div"));
+
+	document.getElementById("addressInput")
+		.addEventListener("keyup", function(event) {
+		event.preventDefault();
+		//if the user hit the enter key then run the function to run the search
+		if (event.keyCode === 13) {
+			throttleSubmit(document.getElementById("addressInput").value)
+		}
+	});
+
+	var zoomThreshold = 16
+
+	map.on("extent-change", function () {
+        if (toggle.basemap === "gray-vector") {
+            if (map.getZoom() > zoomThreshold) {
+              map.addLayer(imageServiceLayer, 1)
+            } else {
+              map.removeLayer(imageServiceLayer)
+            }
+        }
+	});
+	
+	document.addEventListener('click', function (event) {
+
+		var currClassName = event.target.className;
+		if (currClassName === "basemapBG") {
+			
+			if (toggle.basemap !== "satellite") {
+				if (map.getZoom() > zoomThreshold) {
+				map.addLayer(imageServiceLayer, 1)
+				} else {
+					map.removeLayer(imageServiceLayer)
+				}
+			} else {
+				map.removeLayer(imageServiceLayer);
+			}
+		}
+	});
+
+
+
+	function updateLayerVisibility () {
+            var inputs = query(".list_item");
+	    
+            var inputCount = inputs.length;
+            visibleLayerIds = [0,1,14,15,16];
+
+            for (var i = 0; i < inputCount; i++) {
+	   
+              if (inputs[i].checked) {
+	     theLayerID=parseInt(inputs[i].value)
+                visibleLayerIds.push(theLayerID);
+		if (theLayerID==2) {
+			 visibleLayerIds.push(3);
+		}
+		if (theLayerID==4) {
+			 visibleLayerIds.push(5);
+		}
+		if (theLayerID==6) {
+			 visibleLayerIds.push(7);
+		}
+		if (theLayerID==8) {
+			 visibleLayerIds.push(9);
+		}
+		if (theLayerID==10) {
+			 visibleLayerIds.push(11);
+		}
+		if (theLayerID==12) {
+			 visibleLayerIds.push(13);
+		}
+              }
+            }
+	
+            if (visibleLayerIds.length === 0) {
+              visibleLayerIds.push(-1);
+            }
+
+            dynamicMapServiceLayer.setVisibleLayers(visibleLayerIds);
+	   // console.log(visibleLayerIds)
+          }
+        function mapReady () {
+	//once the map has fullt loaded set up the identifyTask which will take the map click and return any features under that map location.
+		map.on("click", executeIdentifyTask);
+		//create identify tasks and setup parameters
+		identifyTask = new IdentifyTask("//" + theServerName +"/arcgiswa/rest/services/CannabisRetail/MapServer");
+		identifyParams = new IdentifyParameters();
+		identifyParams.tolerance = 0;
+		identifyParams.returnGeometry = true;
+		identifyParams.layerIds = [14,15,16];
+		identifyParams.layerOption = IdentifyParameters.LAYER_OPTION_ALL;
+		identifyParams.width = map.width;
+		identifyParams.height = map.height;
+        }
+
+        function executeIdentifyTask (event) {
+	//run the identify to get the features that intersect with the map click
+          identifyParams.geometry = event.mapPoint;
+          identifyParams.mapExtent = map.extent;
+
+          var deferred = identifyTask
+            .execute(identifyParams)
+            .addCallback(function (response) {
+              // response is an array of identify result objects
+              // Let's return an array of features.
+              return arrayUtils.map(response, function (result) {
+		var feature = result.feature;
+		var layerName = result.layerName;
+
+		feature.attributes.layerName = layerName;
+		switch(layerName) {
+			case 'Permitted':
+				var Permitted = new InfoTemplate("Principally Permitted",
+					"Retail Cannabis: principally permitted.<br><br>Medical Cannabis: permitted subject to mandatory Discretionary Review.");
+				feature.setInfoTemplate(Permitted);
+				return feature;
+				break;
+			case 'PermittedWithCU':
+				var PermittedWithCU = new InfoTemplate("Permitted With CU",
+					"Retail Cannabis: permitted with Conditional Use Authorization.<br><br>Medical Cannabis: permitted subject to mandatory Discretionary Review.");
+				feature.setInfoTemplate(PermittedWithCU);
+				return feature;
+				break;
+			case 'PermittedWithMicrobusiness':
+				var PermittedWithMicro = new InfoTemplate("Permitted With Microbusiness",
+					"Retail Cannabis: permitted with Microbusiness.<br><br>Medical Cannabis: permitted subject to mandatory Discretionary Review.");
+				feature.setInfoTemplate(PermittedWithMicro);
+				return feature;
+				break;
+			default:
+				return;
+				break;
+		}
+              });
+            });
+
+          // InfoWindow expects an array of features from each deferred
+          // object that you pass. If the response from the task execution
+          // above is not an array of features, then you need to add a callback
+          // like the one above to post-process the response and return an
+          // array of features.
+          map.infoWindow.setFeatures([deferred]);
+          map.infoWindow.show(event.mapPoint);
+        }
+      });
+
+
+      function addTempLayer(data) {
+      //creates a FeatureSet from the json that was returned from the geocoder, then create a FeatureLayer from that FeatureSet add it to the map and zoom to its extent.
+		var fs= new esri.tasks.FeatureSet()
+		var features= [];
+		for (i = 0; i< data.features.length; i++) {
+			features.push(data.features[i])
+		}
+		fs.features=features;
+		fs.geometryType=data.geometryType
+		//alert(fs.features.length )
+		
+		if (fs.features.length > 0) {
+			thetemplayer = new esri.layers.FeatureLayer({
+			     layerDefinition: {
+				geometryType: data.geometryType,
+				fields: data.fields
+			     },
+			     featureSet: {
+				features: fs.features,
+				geometryType: data.geometryType,
+				spatialReference: data.spatialReference
+				}
+			});
+			thetemplayer.setRenderer(renderer);
+			map.addLayer(thetemplayer);
+
+			map.setExtent(fs.features[0].geometry.getExtent().expand(4));
+			executeQueryPoly(fs.features[0].geometry)
+		}
+
+      }
+
+	
+
+      function executeQueryPoly (thepoly) {
+      //alert(thepoly)
+	//a sucessful geocode will send the geometry of the found feature here.  This function will then send the geometry to a query task, using the WITHIN spatial relationship to query against the 3 green zones.
+		permittedFL = new esri.layers.FeatureLayer("http://" + theServerName + "/arcgiswa/rest/services/CannabisRetail/MapServer/14", {
+			outFields: [""]
+
+		});
+		permittedWithCUFL = new esri.layers.FeatureLayer("http://" + theServerName+ "/arcgiswa/rest/services/CannabisRetail/MapServer/15", {
+			outFields: [""]
+		});
+		permittedWithMicrobusinessFL = new esri.layers.FeatureLayer("http://" + theServerName + "/arcgiswa/rest/services/CannabisRetail/MapServer/16", {
+			outFields: [""]
+		});
+		var query = new esri.tasks.Query();
+		query.geometry =thepoly;
+		query.spatialRelationship=esri.tasks.Query.SPATIAL_REL_WITHIN;
+
+		var deferred1 = permittedFL.selectFeatures(query, esri.layers.FeatureLayer.SELECTION_NEW, function (selection) {
+			//console.log(selection.length)
+			if (selection.length > 0) {
+				//console.log("Principally Permitted");
+				if (checkMob(navigator.userAgent) && screen.width < 500) {
+					var y =window.scrollY +20
+					var x = screen.width - 5
+					new Messi('Cannabis Retail: Principally Permitted.<br><br>Medical Cannabis:  permitted subject to mandatory Discretionary Review.', {title: 'Cannabis', width: x, viewport: { top: y, left: '0px'}, modal: true, titleClass: 'info', buttons: [{id: 0, label: 'OK'}]});
+				} else {
+					setTimeout("new Messi('Cannabis Retail: Principally Permitted.<br><br>Medical Cannabis:  permitted subject to mandatory Discretionary Review.', {title: 'Cannabis Retail', modal: true, titleClass: 'info', buttons: [{id: 0, label: 'OK'}]});",750)
+				}
+			} else {
+				var deferred2 = permittedWithCUFL.selectFeatures(query, esri.layers.FeatureLayer.SELECTION_NEW, function (selection) {
+					//console.log(selection.length)
+					if (selection.length > 0) {
+					
+						//console.log("Permitted With Conditional Use Authorization");
+						if (checkMob(navigator.userAgent) && screen.width < 500) {
+							var y =window.scrollY +10
+							var x = screen.width - 20
+							new Messi('Cannabis Retail: Permitted With Conditional Use Authorization.<br><br>Medical Cannabis:  permitted subject to mandatory Discretionary Review.', {title: 'Cannabis Retail', width: x, viewport: { top: y, left: '0px'}, modal: true, titleClass: 'info', buttons: [{id: 0, label: 'OK'}]});
+						} else {
+							setTimeout("new Messi('Cannabis Retail: Permitted With Conditional Use Authorization.<br><br>Medical Cannabis:  permitted subject to mandatory Discretionary Review.', {title: 'Cannabis Retail', modal: true, titleClass: 'info', buttons: [{id: 0, label: 'OK'}]});",750)
+						}
+					} else {
+						
+						var deferred3 = permittedWithMicrobusinessFL.selectFeatures(query, esri.layers.FeatureLayer.SELECTION_NEW, function (selection) {
+						//console.log(selection.length)
+							if (selection.length > 0) {
+								//console.log("Permitted With Microbusiness");
+								if (checkMob(navigator.userAgent) && screen.width < 500) {
+									var y =window.scrollY +10
+									var x = screen.width - 20
+									new Messi('Cannabis Retail: Permitted With Microbusiness.<br><br>Medical Cannabis:  permitted subject to mandatory Discretionary Review.', {title: 'Cannabis Retail', width: x, viewport: { top: y, left: '0px'}, modal: true, titleClass: 'info', buttons: [{id: 0, label: 'OK'}]});
+								} else {
+									setTimeout("new Messi('Cannabis Retail: Permitted With Microbusiness.<br><br>Medical Cannabis:  permitted subject to mandatory Discretionary Review.', {title: 'Cannabis Retail', modal: true, titleClass: 'info', buttons: [{id: 0, label: 'OK'}]});",750)
+								}
+							} else  {
+								if (checkMob(navigator.userAgent) && screen.width < 500) {
+									var y =window.scrollY +10
+									var x = screen.width - 20
+									new Messi('Not Permitted.', {title: 'Cannabis Retail', width: x, viewport: { top: y, left: '0px'}, modal: true, titleClass: 'info', buttons: [{id: 0, label: 'OK'}]});
+								} else {
+									setTimeout("new Messi('Not Permitted.', {title: 'Cannabis Retail', modal: true, titleClass: 'info', buttons: [{id: 0, label: 'OK'}]});",750)
+								}
+							}
+							
+						});
+					}
+				});
+				}
+		});
+		
+	}
+	
+    </script>
+  </head>
+<div id="checkboxes">
+	Retail Cannabis Permits<br>
+	&nbsp;&nbsp;<input type="checkbox" class="list_item" id="layer2CheckBox" value=6 /> Submitted <br>
+	&nbsp;&nbsp;<input type="checkbox" class="list_item" id="layer0CheckBox" value=2 /> On Hold <br>
+	&nbsp;&nbsp;<input type="checkbox" class="list_item" id="layer1CheckBox" value=4 /> Processing <br>
+	&nbsp;&nbsp;<input type="checkbox" class="list_item" id="layer3CheckBox" value=8 /> Approved<br>
+	<br>Medical Cannabis Dispensaries<br>
+	&nbsp;&nbsp;<input type="checkbox" class="list_item" id="layer4CheckBox" value=10 /> Existing MCDs<br>
+	<br>Schools<br>
+	&nbsp;&nbsp;<input type="checkbox" class="list_item" id="layer5CheckBox" value=12/> Schools K-12<br>
+	
+	<br>NOTE: These map layers include 600ft  
+	<br>buffers around the subject property.
+
+</div>
+
+<div id="legend"><img src="CannabisLegend.png" ></div>
+
+  <body>
+    <div id="map">
+	<div id='searchbox'>
+		<input alt="Search for an address or parcel. E.g. 400 Van Ness Ave or 0787/001" title = "Search for an address or parcel. E.g. 400 Van Ness Ave or 0787/001" type="text" id="addressInput" name="address" placeholder='&nbsp; Search for an address or parcel number.  E.g. 400 Van Ness Ave or 0787/001' value="" />
+	</div>
+	<div id="BasemapToggle"></div>
+    </div>
+  </body>
+</html>
