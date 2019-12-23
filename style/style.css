@@ -920,7 +920,7 @@ button.close:hover {
     /* height: 900px; */
     min-width: 100%;
     overflow: auto;
-    box-shadow: inset 0px -40px 41px -44px rgba(0,0,0,0.75);
+    box-shadow: inset 0px -40px 41px -44px rgba(0,0,0,0.2);
   }
 
   #filter-elements {
@@ -968,7 +968,7 @@ button.close:hover {
 
 @media only screen and (max-width: 544px) {
   .esri-popup__main-container {
-    /* bottom: 60px !important; */
+    bottom: 60px !important;
     border-radius: 0;
   }
   .tab-display-container {
