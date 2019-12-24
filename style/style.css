@@ -370,18 +370,19 @@ a#list-view-link {
   display: flex;
   height: 100%;
   margin-top: 10px;
-  padding-top: 5px;
+  padding-top: 10px;
 }
 
 .zoning-description {
   text-align: left;
   /* margin-left: 45px; */
-  padding-left: 45px;
+  /* padding-left: 45px; */
   font-size: 14px;
   color: #666666;
-  padding-top: 0;
+  /* padding-top: 0; */
   line-height: 1.4;
   margin-top: -10px;
+  padding: 0 45px;
 }
 
 .zoning-description:not(:last-child) {
@@ -670,6 +671,7 @@ button.close:hover {
 
 .esri-popup--shadow,.esri-popup__main-container {
   border-radius: 8px;
+  padding: 0 !important;
 }
 
 .cannabis-permit-container {
@@ -792,8 +794,8 @@ button.close:hover {
 
 #alert {
   display: inline-block;
-  width: 15px;
-  height: 15px;
+  width: 20px;
+  height: 20px;
   position: absolute;
   right: 12px;
   cursor: pointer;
@@ -837,14 +839,19 @@ button.close:hover {
     height: 100%;
   }
 
-  .selected {
-    background: white;
-  }
+
 
   .legend-element {
     display: flex;
     justify-content: center;
     align-items: center;
+    color: #4F66EE;
+    font-weight: 500;
+  }
+
+  .selected {
+    background: white;
+    color: #1C3E57;
   }
 
   .tab-container {
@@ -976,7 +983,7 @@ button.close:hover {
   }
 }
 
-@media only screen and (max-width: 360px) {
+@media only screen and (max-width: 380px) {
   .esri-popup__main-container {
     position: fixed !important;
   }

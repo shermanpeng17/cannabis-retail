@@ -198,7 +198,11 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
       locationTab: '#location-tab',
       alertMobile: '#alert',
       esriBasemapToggle: '.esri-basemap-toggle',
-      esriBasemapThumbnailImage: '.esri-basemap-thumbnail__image'
+      esriBasemapThumbnailImage: '.esri-basemap-thumbnail__image',
+      tabsContainer: '.tab-container',
+      mapContainer: '.map-container',
+      contentContainer: '.content-container',
+      esriPopupContainer: '.esri-popup__main-container'
     }
 
     return {
@@ -243,7 +247,6 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
             // at between top and bottom scroll
             // $(this).css('box-shadow', 'inset 0px 40px 41px -44px rgba(0,0,0,0.75), inset 0px -40px 41px -44px rgba(0,0,0,0.75)')
           }
-
         });
       },
 
@@ -280,26 +283,34 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
         }
       },
 
-      changeToNewMapHeightMobile: function() {
-        console.log('in change to new map heght mobile')
-        var popupHeight = $('.esri-popup__main-container').height();
-        console.log(popupHeight)
-        var contentContainerHeight = $ ('.content-container').height();
-        console.log(contentContainerHeight)
-        var newMapHeight = contentContainerHeight - popupHeight;
-        console.log(newMapHeight)
-        $('.map-container').css('height', newMapHeight.toString())
+      changeMapHeightAndHandleTabDisplay: function(popupIsVisible) {
+        console.log('in change map height func')
+        var contentContainerHeight = $ (uiSelectors.contentContainer).height();
+        var tabHeightsAtBottomOfScreen = 60;
+
+        if (popupIsVisible) {
+          var popupHeight = $(uiSelectors.esriPopupContainer).height();
+          var newMapHeight = contentContainerHeight - popupHeight - tabHeightsAtBottomOfScreen;
+        } else {
+          var newMapHeight = contentContainerHeight - tabHeightsAtBottomOfScreen;
+        }
+
+        $(uiSelectors.tabDisplayContainer).css('display', 'none');
+        var tabDisplayContainerChildren = $(uiSelectors.tabsContainer).children();
+        for (var i = 0; i < tabDisplayContainerChildren.length; i++) {
+          tabDisplayContainerChildren[i].classList.remove('selected');
+        }
+        $(uiSelectors.mapContainer).css('height', newMapHeight.toString());
       },
 
       changeToNewMapHeight: function() {
         var mobileMenuHeight = $('.menu-mobile').height();
         var contentContainerHeight = $ ('.content-container').height();
         var newMapHeight = contentContainerHeight - mobileMenuHeight;
-        $('.map-container').css('height', newMapHeight.toString())
+        $('.map-container').css('height', newMapHeight.toString());
       },
 
       showLegendOnMobileTab: function (clickedElement) {
-        console.log(clickedElement)
         $(uiSelectors.mobileLegend).css('display', 'block');
         $(uiSelectors.filterContainer).css('display', 'none');
     
@@ -430,16 +441,16 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
       view: view,
       nextBasemap: "hybrid"
     });
-
-
+    
 
 
     view.when(function () {
       view.on('click', executeIdentifyTask);
       console.log(view);
       view.watch("popup.visible", function(newVal, oldVal) {
-        console.log("old val: " + oldVal);
-        console.log("new val: " + newVal);
+        if (App.isOnMobile()) {
+          UICtrl.changeMapHeightAndHandleTabDisplay(newVal);
+        } 
       })
     });
 
@@ -500,6 +511,8 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
       element.setAttribute('class', className);
       return element;
     }
+
+ 
 
     function isSmallView() {
       var windowWidth = window.innerWidth;
@@ -677,10 +690,12 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
       });
     }
 
+    /*
+      Add a feature layer to the map based on search results
+    */
     function addClickedPolygonLayerToMap(geometry, identifyResults) {
-      /*
-        Add a feature layer to the map based on search results
-      */
+
+      console.log('in add click polygon layer to map')
       map.remove(polygonLayerAddedToMap)
 
       var features = [identifyResults[0].feature];
@@ -689,7 +704,7 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
         color: [146, 148, 150, 0.25],
         style: 'solid',
         outline: {
-          color: [7, 40, 250],
+          color: [79, 102, 238, 1],
           width: 2
         }
       };
@@ -707,6 +722,16 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
       map.add(featureLayerToAddToMap)
     }
 
+    function handleClickingOnMcd() {
+
+    }
+
+    function handleNonMcd() {
+
+    }
+
+
+
     function executeIdentifyTask(event) {
       /*
         Runs identify task to see if clicked parcel is a cannabis retail. 
@@ -718,8 +743,9 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
       identifyParams.tolerance = 3;
       identifyParams.returnGeometry = true;
       identifyParams.layerIds = [
-        cannabisRetailLayerMapToNumber.parcelLabelLayerNum,
         cannabisRetailLayerMapToNumber.mcdLayerNum,
+
+        cannabisRetailLayerMapToNumber.parcelLabelLayerNum,
 
         cannabisRetailLayerMapToNumber.CANNABIS_PERMITTED_LAYER_NUM,
         cannabisRetailLayerMapToNumber.CANNABIS_PERMITTED_WITHCU_LAYER_NUM,
@@ -730,6 +756,8 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
       identifyParams.height = view.height;
       identifyParams.geometry = event.mapPoint;
       identifyParams.mapExtent = view.extent;
+
+      // logic = check first item layer name. then use name to see if layer is turned on, if turned on then display mcd popup. else if layer not turned on then use next item in array and then identify 
 
       identifyTask
         .execute(identifyParams)
@@ -746,6 +774,12 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
           var firstResultAttributes = firstResultFeature.attributes;
           var geometry = firstResultFeature.geometry;
 
+          var firstResultLayerName = firstResult.layerName;
+          var layerToCheck = mapImageLayer.allSublayers.filter(function(eachLayer) {
+            return eachLayer.title === firstResultLayerName;
+          })
+          
+
           var NEGATIVE_BUFFER_DISTANCE_IN_FEET = -0.2;
           var tempPolygon = new Polygon(geometry);
           var negativeBufferedGeometry = geometryEngine.geodesicBuffer(tempPolygon, NEGATIVE_BUFFER_DISTANCE_IN_FEET, "feet");
@@ -754,6 +788,9 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
           if (mapBlockLotNum) {
             clickedOnParcel = true;
           }
+
+
+
           searchParcelIsCannabisPermit(mapBlockLotNum).then(function (response) {
             if (response.features.length !== 0) {
               resultAttributes = response.features[0].attributes;
@@ -761,9 +798,7 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
             } else {
               clickedParcelInsideCannabisRetail = false;
             }
-            console.log('clicked parcel is cannabis: ' + clickedParcelInsideCannabisRetail)
             getInsideWhatZoning(negativeBufferedGeometry).then(function (zoningLayer) {
-              console.log('inside zoning: ' + zoningLayer)
               if (zoningLayer !== 'none') {
                 if (clickedOnParcel) {
                   if (clickedParcelInsideCannabisRetail) {
@@ -807,7 +842,7 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
               }
             })
           })
-
+          zoomInToSearchPolygon(tempPolygon);
           var clickedParcelGeometry = identifyResults[0].feature.geometry;
           addClickedPolygonLayerToMap(clickedParcelGeometry, identifyResults)
         });
@@ -1027,7 +1062,6 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
         This function takes in a negative buffered geometry and checks to see what cannabis zoning it is in. The return type is a string
       */
      
-      console.log('in get inside what zoning');
       return getPolygonWithinLayerPromise(negativeBufferedGeometry, cannabisPermittedWithMicrobusinessLayer)
         .then(function (response) {
           if (response.features.length !== 0) {
@@ -1073,11 +1107,6 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
       return newFeatureLayer;
     }
 
-    function isOnMobile() {
-      var windowWidth = window.innerWidth;
-      console.log(windowWidth)
-      return windowWidth < 380 ? true : false;
-    }
 
     /*
       this function displays the search polygon, zooms in to it, and displays the popup
@@ -1085,7 +1114,7 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
     function addSearchPolygonToMapHelper(jsonData, searchType, nameOfCannabisRetail) {
       // var jsonData = JSON.parse(JSON.stringify(jsonData))
       map.remove(polygonLayerAddedToMap)
-
+      console.log('in add search polygon to map helper func')
       // only grab first item in array to avoid parcels that return multiple results from search
       var featuresFromJsonResponse = [jsonData.features[0]];
       var featureAttributes = jsonData.features[0].attributes;
@@ -1120,11 +1149,8 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
       // Need to create polygon from Polygon class
 
       var tempPolygonHolder = new Polygon(geometryFromJsonResponse)
-
       var negativeBufferedGeometry = geometryEngine.geodesicBuffer(tempPolygonHolder, NEGATIVE_BUFFER_DISTANCE_IN_FEET, "feet");
-
       var tempSearchLayerToAddToMap = createNewFeatureLayer('OBJECTID', correctedFieldsToUse, featuresFromJsonResponse, polygonRenderer, ["*"], 'polygon' )
-
       if (nameOfCannabisRetail) {
         // assign labeling if it is a cannabis permit
         tempSearchLayerToAddToMap.labelingInfo = labelingSetupInfo;
@@ -1133,8 +1159,6 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
       zoomInToSearchPolygon(tempPolygonHolder);
 
       getInsideWhatZoning(negativeBufferedGeometry).then(function (insideWhatZoning) {
-        console.log('zoning is ' + insideWhatZoning);
-
         if (insideWhatZoning !== 'none') {
           if (parcelIsCannabisPermit) {
             searchPopupHtml = getSearchPopupHtmlForCannabisPermit(permitStatus, featureAttributes, insideWhatZoning);
@@ -1145,13 +1169,12 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
           }
         }
         PopupCtrl.showPopup(view, tempPolygonHolder, searchPopupHtml)
-
-      
-        if (isOnMobile()) {
-          console.log('yes mobile')
-          UICtrl.changeToNewMapHeightMobile();
-        }
       });
+
+      if (view.popup.visible) {
+        var popupVisible = true;
+        UICtrl.changeMapHeightAndHandleTabDisplay(popupVisible);
+      }
 
       polygonLayerAddedToMap = tempSearchLayerToAddToMap;
       turnOffSearchLabel(featuresFromJsonResponse)
@@ -1170,7 +1193,6 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
       },
 
       updateLayerVisibility: function (event) {
-        /* code goes here */
         var SUPERVISOR_DISTRICT_LAYER_NUM = cannabisRetailLayerMapToNumber.supervisorDistLayerNum;
         var mapLayerNum = Number(event.target.value);
         var sublayer = mapImageLayer.findSublayerById(parseInt(mapLayerNum));
@@ -1421,44 +1443,21 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
         } else {
           searchByAddressInGISData(searchStr)
           .then(function(searchByAddressSuccess) {
-            // console.log('search address success: ' +searchByAddressSuccess );
             if (!searchByAddressSuccess) {
               searchByNameInGISData(searchStr) 
               .then(function(searchByNameSuccess) {
-                // console.log('search by name success :' + searchByNameSuccess);
                 if (searchByNameSuccess) {
                   return Promise.reject('');
+                } else {
+                  var bodyDisplayStr = 'Please try again';
+                  var titleDisplayStr = 'No Results For ' + searchStr;
+                  UICtrl.displayModal(titleDisplayStr, bodyDisplayStr);
                 }
-              })
+              });
             }
           });
         }
-      }) 
-      // .then(function(what) {
-      //   // search by address in GIS table
-      //   searchByAddressInGISData(searchStr)
-      //   .then(function(searchByAddressSuccess) {
-      //     console.log('search address success: ' +searchByAddressSuccess );
-      //     if (searchByAddressSuccess) {
-      //       return Promise.reject('');
-      //     }
-      //   })
-      // })
-      // .then(function() {
-      //   searchByNameInGISData(searchStr) 
-      //   .then(function(searchByNameSuccess) {
-      //     console.log('search by name success :' + searchByNameSuccess);
-      //     if (searchByNameSuccess) {
-      //       return Promise.reject('');
-      //     }
-      //   })
-      // })
-      // .then(function(what) {
-      //   console.log('no success')
-      //   var bodyDisplayStr = 'Please try again';
-      //   var titleDisplayStr = 'No Results For ' + searchStr;
-      //   UICtrl.displayModal(titleDisplayStr, bodyDisplayStr);
-      // })
+      });
     }
 
     function listenForEvents() {
@@ -1469,40 +1468,39 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
         callLoadSpinner()
         event.preventDefault();
         var searchString = $('#addressInput').val();
-        // performSearches(searchString);
         handleSearching(searchString)
 
-        // UICtrl.hideMobileMenu();
-        // UICtrl.changeToNewMapHeight();
       });
 
       // clicking on legend tab in mobile view
       $(uiSelectors.legendTab).click(function() {
         UICtrl.highLightClickedTab(event.target); 
         UICtrl.showLegendOnMobileTab();
-        // UICtrl.changeToNewMapHeight();
       })
 
       // clicking on location tab in mobile view
       $(uiSelectors.locationTab).click(function() {
         UICtrl.highLightClickedTab(event.target); 
         UICtrl.showFilterOnMobileTab();
-        // UICtrl.changeToNewMapHeight();
       })
 
       document.addEventListener('click', function (event) {
         var MULTIPLE_BUSINESS_SELECTION_CLASS = 'multiple-business-selection';
-
         var clickedType = event.target.type;
-
         var currClassName = event.target.className;
-
         var clickedItemTextContent = event.target.textContent;
         var clickedBusinessName = clickedItemTextContent.split(':')[0];
         var clickedBusinessAddress = clickedItemTextContent.split(':')[1];
         var parentElement = event.target.parentElement;
         var parentElementClassName = parentElement.className;
 
+        if (currClassName.indexOf('btn-search') !== -1 || currClassName.indexOf('fa-search') !== -1 || currClassName.indexOf('input-group-append') !== -1) {
+          var searchStr = $('#addressInput').val();
+          
+          handleSearching(searchStr);
+
+        }
+        
         // User has selected on a choice at this point
         if ((currClassName.indexOf(MULTIPLE_BUSINESS_SELECTION_CLASS) !== -1) && (parentElementClassName === 'messi-button-container')) {
           var currIDName = parentElement.id;
@@ -1541,34 +1539,28 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
 
     }
 
-
-
     return {
+      isOnMobile: function() {
+        var windowWidth = window.innerWidth;
+        console.log(windowWidth)
+        return windowWidth < 380 ? true : false;
+      },
       init: function () {
         $(document).ready(function () {
           listenForEvents();
-          // if (isSmallView()) {
-          //   UICtrl.changeToNewMapHeight();
-          // }
           UICtrl.listenForScrollingForLocationMenu();
           UICtrl.listenForMobileAlert();
-
-
-
         })
-      }
+        if (this.isOnMobile()) {
+          $('#addressInput')[0].placeholder = 'Search';
+        } else {
+          $('#addressInput')[0].placeholder = 'Search for an address, business name, or parcel number';
+        }
+      },
     }
   }();
-
-
   App.init();
-
-
 });
-
-
-
-
 
 
 
