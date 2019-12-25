@@ -300,6 +300,7 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
         for (var i = 0; i < tabDisplayContainerChildren.length; i++) {
           tabDisplayContainerChildren[i].classList.remove('selected');
         }
+        console.log(tabDisplayContainerChildren)
         $(uiSelectors.mapContainer).css('height', newMapHeight.toString());
       },
 
@@ -770,27 +771,43 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
 
           var identifyResults = response.results;
           var firstResult = response.results[0];
+
+
+          var isExistingMcd = false;
+          var mcdLayerOn;
+
+          var firstResultLayerName = firstResult.layerName;
+          if (firstResultLayerName === 'MCDs') {
+            var layerToCheck = mapImageLayer.allSublayers.filter(function(eachLayer) {
+              return eachLayer.title === firstResultLayerName;
+            });
+            mcdLayerOn = layerToCheck.items[0].visible;
+            if (mcdLayerOn) {
+              firstResult = response.results[1];
+            }
+          }
+
           var firstResultFeature = firstResult.feature;
           var firstResultAttributes = firstResultFeature.attributes;
           var geometry = firstResultFeature.geometry;
-
-          var firstResultLayerName = firstResult.layerName;
-          var layerToCheck = mapImageLayer.allSublayers.filter(function(eachLayer) {
-            return eachLayer.title === firstResultLayerName;
-          })
-          
 
           var NEGATIVE_BUFFER_DISTANCE_IN_FEET = -0.2;
           var tempPolygon = new Polygon(geometry);
           var negativeBufferedGeometry = geometryEngine.geodesicBuffer(tempPolygon, NEGATIVE_BUFFER_DISTANCE_IN_FEET, "feet");
 
+          var mcdParcal = firstResultAttributes["Previously Existing MCD"];
+          if (mcdParcal !== undefined) {
+            isExistingMcd = true;
+          }
+
+          console.log(firstResultAttributes)
           var mapBlockLotNum = firstResultAttributes.mapblklot;
           if (mapBlockLotNum) {
             clickedOnParcel = true;
           }
-
-
-
+          // console.log('is mcd: ', isExistingMcd);
+          // console.log('is just regular parcel: ', clickedOnParcel)
+          
           searchParcelIsCannabisPermit(mapBlockLotNum).then(function (response) {
             if (response.features.length !== 0) {
               resultAttributes = response.features[0].attributes;
@@ -798,48 +815,80 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
             } else {
               clickedParcelInsideCannabisRetail = false;
             }
+            console.log('is cannabis permit: ', clickedParcelInsideCannabisRetail)
             getInsideWhatZoning(negativeBufferedGeometry).then(function (zoningLayer) {
-              if (zoningLayer !== 'none') {
-                if (clickedOnParcel) {
-                  if (clickedParcelInsideCannabisRetail) {
-                    searchPopupHtml = getSearchPopupHtmlForCannabisPermit(permitStatus, resultAttributes, zoningLayer);
-                    view.popup.open({
-                      content: searchPopupHtml,
-                      location: geometry.extent.center
-                    });
-                  } else {
-                    // parcel not cannabis retail
-                    getSearchPopupHtmlNotCannabisPermit(firstResultAttributes, zoningLayer).then(function (popupHtml) {
-                      PopupCtrl.showPopup(view, geometry, popupHtml)
+              console.log('inside zoning: ', zoningLayer)
 
-                      // view.popup.open({
-                      //   content: popupHtml,
-                      //   location: geometry.extent.center
-                      // });
-                    })
-                  }
-                } else {
-                  // clicked inside cannabis zoning
-                  var popupHtml = getPopupHtmlForInsideCannabisZone(zoningLayer);
-                  PopupCtrl.showPopup(view, geometry, popupHtml)
+            if (isExistingMcd) {
+              permitStatus = undefined;
+              searchPopupHtml = getPopupForSearch(isExistingMcd, permitStatus, firstResultAttributes, zoningLayer)
+              view.popup.open({
+                content: searchPopupHtml,
+                location: geometry.extent.center
+              });
+            } else if (clickedParcelInsideCannabisRetail) {
+              searchPopupHtml = getPopupForSearch(permitStatus, resultAttributes, zoningLayer, isExistingMcd)
+                view.popup.open({
+                  content: searchPopupHtml,
+                  location: geometry.extent.center
+                });
+            } else {
+              // is just a regular parcel, will have to geocode parcel to get address if it exists
+            }
 
-                  // view.popup.open({
-                  //   content: popupHtml,
-                  //   location: event.mapPoint
-                  // });
-                }
-              } else {
-                // did not click inside zoning layer but parcel is a cannabis ertail
-                if (clickedParcelInsideCannabisRetail) {
-                  searchPopupHtml = getSearchPopupHtmlForCannabisPermit(permitStatus, resultAttributes, zoningLayer);
-                  PopupCtrl.showPopup(view, geometry, searchPopupHtml)
+              // if (zoningLayer !== 'none') {
+              //   if (isExistingMcd) {
+              //     console.log('is mcd 0000000000000')
+              //     searchPopupHtml = getPopupForSearch(permitStatus, firstResultAttributes, zoningLayer, isExistingMcd)
+              //     console.log(searchPopupHtml)
+              //     view.popup.open({
+              //       content: searchPopupHtml,
+              //       location: geometry.extent.center
+              //     });
+              //   } else if (clickedParcelInsideCannabisRetail) {
+              //     console.log('-------')
+              //     console.log(permitStatus)
+              //     // searchPopupHtml = getSearchPopupHtmlForCannabisPermit(permitStatus, resultAttributes, zoningLayer);
+              //     searchPopupHtml = getPopupForSearch(permitStatus, resultAttributes, zoningLayer, isExistingMcd)
+              //     view.popup.open({
+              //       content: searchPopupHtml,
+              //       location: geometry.extent.center
+              //     });
+              //   }
+                
+                
+                
+                // else {
+                //   // parcel not cannabis retail
+                //   getSearchPopupHtmlNotCannabisPermit(firstResultAttributes, zoningLayer).then(function (popupHtml) {
+                //     PopupCtrl.showPopup(view, geometry, popupHtml)
+                //   })
+                // }
+                
+              //   else if (isExistingMcd) {
+              //     var popupHtml = getPopupForSearch(permitStatus, firstResultAttributes, zoningLayer, isExistingMcd);
 
-                  // view.popup.open({
-                  //   content: searchPopupHtml,
-                  //   location: geometry.extent.center
-                  // });
-                }
-              }
+              //     PopupCtrl.showPopup(view, geometry, popupHtml)
+              //   } else {
+              //     // clicked inside cannabis zoning
+              //     // var popupHtml = getPopupHtmlForInsideCannabisZone(zoningLayer);
+              //     var popupHtml = getPopupForSearch(permitStatus, resultAttributes, zoningLayer, isExistingMcd);
+
+              //     PopupCtrl.showPopup(view, geometry, popupHtml)
+              //   }
+              // } else {
+              //   // did not click inside zoning layer but parcel is a cannabis ertail
+              //   if (clickedParcelInsideCannabisRetail) {
+              //     searchPopupHtml = getSearchPopupHtmlForCannabisPermit(permitStatus, resultAttributes, zoningLayer);
+              //     PopupCtrl.showPopup(view, geometry, searchPopupHtml)
+              //     // view.popup.open({
+              //     //   content: searchPopupHtml,
+              //     //   location: geometry.extent.center
+              //     // });
+              //   }
+              // }
+              // }
+              
             })
           })
           zoomInToSearchPolygon(tempPolygon);
@@ -909,6 +958,81 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
       }
     }
 
+    function getPopupForSearch(isMcd, permitType, attributes, zoningLayer, ) {
+      console.log('attributes: ', attributes)
+      var dbaName;
+      var address;
+      var type;
+      var popupHtml = '';
+
+      // For zoning will have to run query to see which zoning it is in
+      var permitTypeMapping = {
+        "Submitted": {
+          divId: "submitted",
+          zoning: ""
+        },
+        "Processing": {
+          divId: "processing"
+        },
+        "Under Construction": {
+          divId: "underConstruction"
+        },
+        "On Hold": {
+          divId: "onHold"
+        },
+        "Approved": {
+          divId: "approved"
+        }
+      }
+
+      if (permitType) {
+        console.log('is permit type')
+        var divId = permitTypeMapping[permitType].divId;
+        dbaName = attributes.dba_name;
+        address = attributes.address;
+        type = attributes.activities;
+        popupHtml += 
+        `
+        <div class="cannabis-permit-container">
+          <div class="cannabis-permit" id=${divId}>  ${permitType} </div>
+        </div>
+        <div class="align-left retail-name"> ${dbaName} </div>
+        <div class="align-left retail-address"> ${address} </div>
+        <table class="status-section" >
+          <tr>
+            <td class="attribute">Status</td>
+            <td class="attribute-detail" style="padding-right: 15px">Referred to Planning Department
+          </tr>
+          <tr>
+            <td class="attribute">Type</td>
+            <td class="attribute-detail"> ${type} </td>
+          </tr>
+        </table>
+        `
+      } else if (isMcd) {
+        console.log('is mcd')
+        dbaName = attributes.DBA;
+        address = attributes.Address
+        popupHtml += 
+        `
+        <div class="align-left retail-name"> ${dbaName} </div>
+        <div class="align-left retail-address"> ${address} </div>
+        <table class="status-section" >
+          <tr>
+            <td class="attribute">Type</td>
+            <td class="attribute-detail">Existing medical cannabis dispensaries</td>
+          </tr>
+        </table>
+        `
+      }
+    
+      if (zoningLayer !== 'none') {
+        popupHtml += getZoningInformartionForPopup(zoningLayer)
+
+      }
+      return popupHtml;
+    }
+
     function getSearchPopupHtmlForCannabisPermit(permitType, attributes, zoningLayer) {
 
       var dbaName = attributes.dba_name;
@@ -966,7 +1090,6 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
     }
 
     function getPopupHtmlForInsideCannabisZone(zoning) {
-
       var popupHtml = getZoningInformartionForPopup(zoning);
       return popupHtml
     }
@@ -1542,8 +1665,7 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
     return {
       isOnMobile: function() {
         var windowWidth = window.innerWidth;
-        console.log(windowWidth)
-        return windowWidth < 380 ? true : false;
+        return windowWidth < 544 ? true : false;
       },
       init: function () {
         $(document).ready(function () {
