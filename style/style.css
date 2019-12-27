@@ -247,7 +247,8 @@ html, body, #map {
 
 
 #mcd {
-  background-color:#2E521D; ;
+  background-color:#2E521D;
+  color: white;
 }
 
 .pin {
@@ -441,7 +442,7 @@ a#list-view-link {
 
 }
 
-.retail-cannabis-checkbox, .disclaimer, .list-view {
+.retail-cannabis-checkbox, .disclaimer {
   margin: 20px;
 }
 
@@ -526,13 +527,25 @@ a#list-view-link {
   background-color: white;
 }
 
-.esri-popup__navigation {
-    display: none;
+/* .esri-popup__action {
+  display: none;
+} */
+
+.esri-popup__inline-actions-container {
+  display: none;
 }
 
-.esri-popup__footer {
+/* .esri-popup__button {
+  display: none;
+} */
+
+/* .esri-popup__navigation {
     display: none;
-}
+} */
+
+/* .esri-popup__footer {
+    display: none;
+} */
 
 
 .esri-icon-close {
@@ -622,7 +635,7 @@ a#list-view-link {
 .modal-title {
   text-align: center;
   width: 100%;
-  position: absolute;
+  /* position: absolute; */
 }
 
 .modal-header {
@@ -648,10 +661,6 @@ button.close:hover {
   opacity: 0.75;
 }
 
-.modal-body {
-  padding: 0;
-  
-}
 
 .modal-content {
   border-top-left-radius: .5rem;
@@ -667,7 +676,7 @@ button.close:hover {
 }
 
 
-/* search popup*/
+/* search popup */
 
 .esri-popup--shadow,.esri-popup__main-container {
   border-radius: 8px;
@@ -679,7 +688,6 @@ button.close:hover {
 }
 
 .cannabis-permit {
-  /* display: inline-block; */
   font-size: 15px;
   height: 30px;
   font-weight: 500;
@@ -708,7 +716,6 @@ button.close:hover {
 /* .status-section div {
   line-height: 
 } */
-
 
 .align-left {
   text-align: left;
@@ -831,6 +838,35 @@ button.close:hover {
   padding: 0;
 }
 
+.esri-popup__navigation {
+  width: 100%;
+  margin: 0 auto;
+  background: white;
+}
+
+.esri-popup__button .esri-popup__pagination-next {
+  position: absolute;
+  left: 0;
+}
+
+.esri-icon-left-triangle-arrow:before{
+  content: url(images/Chevron-side.svg) !important;
+
+}
+
+.esri-popup__button .esri-popup__pagination-previous{
+  position: absolute;
+  right: 0;
+
+}
+
+/* .esri-popup__pagination-next-icon {
+  content: url(images/Chevron-side.svg);
+}
+
+.esri-popup__pagination-previous-icon {
+  content: url(images/Chevron-side.svg);
+} */
 
 /* Mobile */
 
@@ -838,8 +874,6 @@ button.close:hover {
   .row {
     height: 100%;
   }
-
-
 
   .legend-element {
     display: flex;
@@ -865,11 +899,11 @@ button.close:hover {
     overflow: auto;
   }
 
-  .modal-header {
+  /* .modal-header {
     background: white;
     border: 0;
     padding: 0;
-  }
+  } */
 
   .col {
     cursor: pointer;
@@ -903,10 +937,6 @@ button.close:hover {
     height: calc(100% - 120px);
   }
 
-  /* .zoning-description{
-    border-bottom: 2px solid #D3D3D3;
-  } */
-
   body {
     display: flex;
     flex-flow: column;
@@ -924,7 +954,6 @@ button.close:hover {
   }
 
   #filter-container {
-    /* height: 900px; */
     min-width: 100%;
     overflow: auto;
     box-shadow: inset 0px -40px 41px -44px rgba(0,0,0,0.2);
@@ -949,13 +978,13 @@ button.close:hover {
   }
 
   .close {
-    color: black;
-    margin: -0rem 0rem -1rem auto !important;
+    /* color: black; */
+    /* margin: -0rem 0rem -1rem auto !important; */
   }
 
   .modal-content {
     text-align: left;
-    padding: 1rem;
+    /* padding: 1rem; */
     box-sizing: border-box;
 
   }
@@ -965,22 +994,40 @@ button.close:hover {
   min-width: 350px;
 }
 
-
 @media only screen and (max-width: 544px) {
   .esri-popup__main-container {
+    position: fixed !important;
     bottom: 60px !important;
     border-radius: 0;
+    box-shadow: inset 0px -40px 41px -44px rgba(0,0,0,0.2);
+
   }
   .tab-display-container {
     height: 220px;
   }
+  .esri-popup__main-container {
+    height: 200px;
+  }
+  .esri-popup__content {
+    margin: 0 15px 0 15px;
+  }
 }
 
-@media only screen and (max-width: 544px) {
+
+@media only screen and (max-width: 500px) {
+  .modal-header {
+    background: white;
+  }
+
+}
+
+/* @media only screen and (max-width: 544px) {
   .esri-popup__main-container {
     position: fixed !important;
   }
-}
+} */
+
+
 /* .esri-popup__main-container {
     bottom: 60px !important;
     border-radius: 0;
