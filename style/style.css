@@ -247,7 +247,8 @@ html, body, #map {
 
 
 #mcd {
-  background-color:#2E521D; ;
+  background-color:#2E521D;
+  color: white;
 }
 
 .pin {
@@ -441,7 +442,7 @@ a#list-view-link {
 
 }
 
-.retail-cannabis-checkbox, .disclaimer, .list-view {
+.retail-cannabis-checkbox, .disclaimer {
   margin: 20px;
 }
 
@@ -526,13 +527,25 @@ a#list-view-link {
   background-color: white;
 }
 
-.esri-popup__navigation {
-    display: none;
+/* .esri-popup__action {
+  display: none;
+} */
+
+.esri-popup__inline-actions-container {
+  display: none;
 }
 
-.esri-popup__footer {
+/* .esri-popup__button {
+  display: none;
+} */
+
+/* .esri-popup__navigation {
     display: none;
-}
+} */
+
+/* .esri-popup__footer {
+    display: none;
+} */
 
 
 .esri-icon-close {
@@ -648,10 +661,6 @@ button.close:hover {
   opacity: 0.75;
 }
 
-.modal-body {
-  padding: 0;
-  
-}
 
 .modal-content {
   border-top-left-radius: .5rem;
@@ -679,7 +688,6 @@ button.close:hover {
 }
 
 .cannabis-permit {
-  /* display: inline-block; */
   font-size: 15px;
   height: 30px;
   font-weight: 500;
@@ -708,7 +716,6 @@ button.close:hover {
 /* .status-section div {
   line-height: 
 } */
-
 
 .align-left {
   text-align: left;
@@ -831,6 +838,35 @@ button.close:hover {
   padding: 0;
 }
 
+.esri-popup__navigation {
+  width: 100%;
+  margin: 0 auto;
+  background: white;
+}
+
+.esri-popup__button .esri-popup__pagination-next {
+  position: absolute;
+  left: 0;
+}
+
+.esri-icon-left-triangle-arrow:before{
+  content: url(images/Chevron-side.svg) !important;
+
+}
+
+.esri-popup__button .esri-popup__pagination-previous{
+  position: absolute;
+  right: 0;
+
+}
+
+/* .esri-popup__pagination-next-icon {
+  content: url(images/Chevron-side.svg);
+}
+
+.esri-popup__pagination-previous-icon {
+  content: url(images/Chevron-side.svg);
+} */
 
 /* Mobile */
 
@@ -972,8 +1008,24 @@ button.close:hover {
   .esri-popup__main-container {
     height: 200px;
   }
+<<<<<<< HEAD
 }
 
+=======
+  .esri-popup__content {
+    margin: 0 15px 0 15px;
+  }
+}
+
+
+@media only screen and (max-width: 500px) {
+  .modal-header {
+    background: white;
+  }
+
+}
+
+>>>>>>> eb303f8d0f49051a5b8cbdd4b4a51247b981d21f
 /* @media only screen and (max-width: 544px) {
   .esri-popup__main-container {
     position: fixed !important;

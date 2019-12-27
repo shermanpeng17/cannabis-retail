@@ -45,6 +45,10 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
     return {
 
       getGeocoderResponse: function (searchString) {
+<<<<<<< HEAD
+=======
+        console.log('in get geocoder response func');
+>>>>>>> eb303f8d0f49051a5b8cbdd4b4a51247b981d21f
         var geocodeUrl = GEOCODER_URL + searchString;
         return $.get(geocodeUrl)
           .then(function (response) {
@@ -158,6 +162,7 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
       modalTitle: '.modal-title',
       modalBody: '.modal-body',
       modalDisplay: '#modalDisplay',
+      modalHeader: '.modal-header',
       mobileFilterContainer: '#filter-container',
       mobileFilterElements: '#filter-elements',
       legendTab: '#legend-tab',
@@ -168,7 +173,8 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
       tabsContainer: '.tab-container',
       mapContainer: '.map-container',
       contentContainer: '.content-container',
-      esriPopupContainer: '.esri-popup__main-container'
+      esriPopupContainer: '.esri-popup__main-container',
+      closeModal: '.close'
     }
 
     return {
@@ -192,6 +198,11 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
         $(uiSelectors.alertMobile).click(function () {
           console.log('you cliekd on alert')
           var disclaimerMessage = 'Map Layers include 600 ft buffers aroud the property. Use this map only as an estimate <br><br> Contact SF Planning to confirm eligibility of a location';
+          $(uiSelectors.modalHeader).css('background', 'white');
+          $(uiSelectors.modalHeader).css('border-bottom', 'none')
+          $(uiSelectors.closeModal).css('color', '#1C3E57');
+
+          
           $(uiSelectors.modalBody).html(disclaimerMessage);
           $(uiSelectors.modalTitle).html('');
           $(uiSelectors.modalDisplay).modal('show');
@@ -707,7 +718,10 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
     }
 
     function isLayerTurnedOn(layerName) {
+<<<<<<< HEAD
       console.log('checking if certan layer is on');
+=======
+>>>>>>> eb303f8d0f49051a5b8cbdd4b4a51247b981d21f
       var layerToCheck = mapImageLayer.allSublayers.items.filter(function (layer) {
         return layer.title === layerName
       });
@@ -721,18 +735,33 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
       */
       var identifyTask = new IdentifyTask(CANNABIS_RETAIL_SERVICE_URL);
       var identifyParams = new IdentifyParameters();
+
+      var parcelAttributes;
+      var parcelNum;
+      var insideZoning = 'none';
+
       var clickedParcelInsideCannabisRetail = true;
-      identifyParams.tolerance = 3;
+      identifyParams.tolerance = 0;
       identifyParams.returnGeometry = true;
       identifyParams.layerIds = [
-        cannabisRetailLayerMapToNumber.mcdLayerNum,
-
         cannabisRetailLayerMapToNumber.parcelLabelLayerNum,
         // cannabisRetailLayerMapToNumber.cannabisLocationsLayer
 
+<<<<<<< HEAD
         // cannabisRetailLayerMapToNumber.CANNABIS_PERMITTED_LAYER_NUM,
         // cannabisRetailLayerMapToNumber.CANNABIS_PERMITTED_WITHCU_LAYER_NUM,
         // cannabisRetailLayerMapToNumber.CANNABIS_PERMITTED_WITH_MICROBUSINESS_LAYER_NUM,
+=======
+        cannabisRetailLayerMapToNumber.CANNABIS_PERMITTED_LAYER_NUM,
+        cannabisRetailLayerMapToNumber.CANNABIS_PERMITTED_WITHCU_LAYER_NUM,
+        cannabisRetailLayerMapToNumber.CANNABIS_PERMITTED_WITH_MICROBUSINESS_LAYER_NUM,
+
+        cannabisRetailLayerMapToNumber.mcdLayerNum,
+
+        cannabisRetailLayerMapToNumber.cannabisLocationsLayer,
+
+
+>>>>>>> eb303f8d0f49051a5b8cbdd4b4a51247b981d21f
       ];
       identifyParams.layerOption = 'all';
       identifyParams.width = view.width;
@@ -746,6 +775,7 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
         .execute(identifyParams)
         .then(function (response) {
           console.log(response)
+<<<<<<< HEAD
           var clickedOnParcel = false;
           var searchPopupHtml;
           var permitStatus;
@@ -818,6 +848,98 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
           //   });
           // });
         });
+=======
+          map.remove(polygonLayerAddedToMap)
+
+          var mcdLayerOn = isLayerTurnedOn('MCDs');
+
+          var results = response.results
+          return results.map(function(result) {
+            var feature = result.feature;
+            var layerName = result.layerName;
+            var featureAttributes = feature.attributes;
+            var geometry = feature.geometry;
+            // var tempPolygon = new Polygon(geometry)
+
+
+            if (layerName === 'Permitted') {
+              insideZoning = 'Allowed';
+            } else if (layerName === 'PermittedWithCU') {
+              insideZoning = 'Allowed with Conditional Use Authorization from SF Planning';
+            } else if (layerName === 'PermittedWithMicrobusiness') {
+              insideZoning = 'Microbusiness permit allowed';
+            } else if (layerName === 'MCDs') {
+              var mcdTradeName = result.feature.attributes.DBA;
+              var isMcd = true;
+              var isCannabisPermit = false;
+              var popupHtml = getPopupForSearch(isMcd, isCannabisPermit, featureAttributes, insideZoning);
+              feature.popupTemplate = {
+                title: mcdTradeName,
+                content: popupHtml
+              }
+
+            } else if (layerName === 'CannabisLocations_OOC') {
+              console.log(result)
+              var cannabisTradeName = result.feature.attributes.dba_name;
+              var isMcd = false;
+              var isCannabisPermit = true;
+              var popupHtml = getPopupForSearch(isMcd, isCannabisPermit, featureAttributes, insideZoning);
+              feature.popupTemplate = {
+                title: cannabisTradeName,
+                content: popupHtml
+              }
+            } else if (layerName === 'Parcel Labels') {
+              var isMcd = false;
+              var isCannabisPermit = false;
+              parcelNum = featureAttributes.mapblklot;
+              parcelAttributes = featureAttributes;
+              var tempPolygon = new Polygon(feature.geometry)
+              var layerToAddToMap = new FeatureLayer({
+                objectIdField: "OBJECTID",
+                source: [feature],
+                fields: [],
+                renderer: polygonRenderer
+              });
+              zoomInToSearchPolygon(tempPolygon)
+              polygonLayerAddedToMap = layerToAddToMap
+              map.add(polygonLayerAddedToMap)
+            }
+            return feature;
+          })
+        })
+        .then(showPopup);
+
+        function showPopup(response) {
+          var filteredPopup = response.filter(function(result) {
+            // return result.popupTemplate !== null;
+            return result.popupTemplate !== null;
+          });
+          console.log(filteredPopup);
+          // add popup for regular parcel. 
+          if (filteredPopup.length === 0) {
+            SearchCtrl.getGeocoderResponse(parcelNum).then(function(response) {
+              var jsonResponse = JSON.parse(response);
+              var attributes = jsonResponse.features[0].attributes;
+              var isMcd = false;
+              var isCannabisPermit = false;
+              var popupHtml = getPopupForSearch(isMcd, isCannabisPermit, attributes, insideZoning);
+              view.popup.open({
+                content: popupHtml,
+                location: event.mapPoint
+              })
+            })
+          } else {
+            if (filteredPopup.length > 0) {
+              view.popup.open({
+                features: filteredPopup,
+                location: event.mapPoint
+              });
+            }
+          }
+        document.getElementById("map").style.cursor = "auto";
+          // document.getElementById("map").style.cursor = "auto";
+        }
+>>>>>>> eb303f8d0f49051a5b8cbdd4b4a51247b981d21f
     }
 
     /* 
@@ -910,7 +1032,10 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
 
       if (isCannabisPermit) {
         var permitType = attributes.PermitStatus;
+<<<<<<< HEAD
         console.log('is permit type');
+=======
+>>>>>>> eb303f8d0f49051a5b8cbdd4b4a51247b981d21f
         var divId = permitTypeMapping[permitType].divId;
         dbaName = attributes.dba_name;
         address = attributes.address;
@@ -934,11 +1059,21 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
         </table>
         `
       } else if (isMcd) {
+<<<<<<< HEAD
         console.log('is mcd')
         dbaName = attributes.dba;
         address = attributes.address;
         popupHtml +=
           `
+=======
+        dbaName = attributes.DBA || attributes.dba;
+        address = attributes.Address || attributes.address;
+        popupHtml +=
+          `
+        <div class="cannabis-permit-container">
+          <div class="cannabis-permit" id="mcd">Existing medical cannabis dispensaries</div>
+        </div>
+>>>>>>> eb303f8d0f49051a5b8cbdd4b4a51247b981d21f
         <div class="align-left retail-name"> ${dbaName} </div>
         <div class="align-left retail-address"> ${address} </div>
         <table class="status-section" >
@@ -950,6 +1085,12 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
         `
       } else if (!isMcd && !isCannabisPermit) {
         var address = attributes.ADDRESS || attributes.ADDRESSSIMPLE;
+<<<<<<< HEAD
+=======
+        if (!address) {
+          address = attributes.mapblklot;
+        }
+>>>>>>> eb303f8d0f49051a5b8cbdd4b4a51247b981d21f
         popupHtml +=
         `
           <div class="align-left retail-name"> ${address} </div>
@@ -1175,6 +1316,7 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
       console.log(jsonData)
       console.log(searchType)
       map.remove(polygonLayerAddedToMap)
+<<<<<<< HEAD
 
       var negativeBufferedGeometry;
       var NEGATIVE_BUFFER_DISTANCE_IN_FEET = -0.2;
@@ -1326,20 +1468,37 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
       var featuresFromJsonResponse = [jsonData.features[0]];
       var featureAttributes = jsonData.features[0].attributes;
       var permitStatus = featureAttributes.PermitStatus;
+=======
+>>>>>>> eb303f8d0f49051a5b8cbdd4b4a51247b981d21f
 
-      var parcelIsCannabisPermit = true;
-      var zoning;
-      var searchPopupHtml;
+      var negativeBufferedGeometry;
+      var NEGATIVE_BUFFER_DISTANCE_IN_FEET = -0.2;
+      var firstResult;
+      var firstResultFeature;
+      var firstResultAttributes;
 
-      // Manually assign geometry type to 'polygon' else will get a error
-      featuresFromJsonResponse[0].geometry.type = 'polygon'
+      var isOnMcd = false;
+      var isOnCannabisPermit = false;
 
-      var geometryFromJsonResponse = jsonData.features[0].geometry;
-      var correctedFieldsToUse = jsonData.fields;
+      var mapBlockLotNum;
+      var mcdLayerOn;
+
+      var tempPolygonHolder;
+
+      var featuresFromJsonResponse;
+
+      var geometry;
+
+      var correctedFieldsToUse;
+
+      firstResultFeature = jsonData.features[0];
+      firstResultAttributes = firstResultFeature.attributes;
+      correctedFieldsToUse = jsonData.fields;
       if (searchType === 'searchingByGeocoder') {
         correctedFieldsToUse.forEach(function (eachField) {
           eachField.type = 'string';
         });
+<<<<<<< HEAD
         var parcelNum = featureAttributes.blklot;
 
         searchParcelIsCannabisPermit(parcelNum).then(function (response) {
@@ -1361,10 +1520,39 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
       if (nameOfCannabisRetail) {
         // assign labeling if it is a cannabis permit
         tempSearchLayerToAddToMap.labelingInfo = labelingSetupInfo;
+=======
       }
+      featuresFromJsonResponse = [jsonData.features[0]];
+      
+      featuresFromJsonResponse[0].geometry.type = 'polygon';
+      var geometryFromJsonResponse = jsonData.features[0].geometry;
+      geometry = new Polygon(geometryFromJsonResponse);
+      tempPolygonHolder = new Polygon(geometryFromJsonResponse);
+      if (searchType === 'searchingByAttributeTable') {
+        mapBlockLotNum = firstResultAttributes.parcelToGeocode;
+      } else {
+        mapBlockLotNum = firstResultAttributes.blklot;
+>>>>>>> eb303f8d0f49051a5b8cbdd4b4a51247b981d21f
+      }
+      
+      // negativeBufferedGeometry = geometryEngine.geodesicBuffer(tempPolygon, NEGATIVE_BUFFER_DISTANCE_IN_FEET, "feet");
+      // mapBlockLotNum = firstResultAttributes.mapblklot;
 
+      // check if mcd layer is on
+
+      mcdLayerOn = isLayerTurnedOn('MCDs');
+
+      // zoomInToSearchPolygon(tempPolygonHolder);
+
+      negativeBufferedGeometry = geometryEngine.geodesicBuffer(tempPolygonHolder, NEGATIVE_BUFFER_DISTANCE_IN_FEET, "feet");
+
+      var tempSearchLayerToAddToMap = createNewFeatureLayer('OBJECTID', correctedFieldsToUse, featuresFromJsonResponse, polygonRenderer, ["*"], 'polygon')
+      
+      polygonLayerAddedToMap = tempSearchLayerToAddToMap;
+      map.add(polygonLayerAddedToMap);
       zoomInToSearchPolygon(tempPolygonHolder);
 
+<<<<<<< HEAD
       getInsideWhatZoning(negativeBufferedGeometry).then(function (insideWhatZoning) {
         // check what zoning it is in. 
         // the scenarios are that it can either be mcd, cannabis, permit, or regular parcel. display appropriate popup depending on scenario
@@ -1379,16 +1567,134 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
         }
         PopupCtrl.showPopup(view, tempPolygonHolder, searchPopupHtml)
       });
+=======
+      cancelSpinner();
+>>>>>>> eb303f8d0f49051a5b8cbdd4b4a51247b981d21f
 
       if (view.popup.visible) {
         var popupVisible = true;
-        UICtrl.changeMapHeightAndHandleTabDisplay(popupVisible);
+        if (App.isOnMobile()) {
+          UICtrl.changeMapHeightAndHandleTabDisplay(popupVisible);
+
+        }
       }
 
-      polygonLayerAddedToMap = tempSearchLayerToAddToMap;
-      turnOffSearchLabel(featuresFromJsonResponse)
+      getInsideWhatZoning(negativeBufferedGeometry).then(function (zoningLayer) {
+        SearchCtrl.checkIfParcelIsMcd(mapBlockLotNum).then(function (isMcdResponse) {
+          isOnMcd = isMcdResponse.features.length !== 0;
+          var mcdFeatures = isMcdResponse.features;
+          SearchCtrl.searchParcelIsCannabisPermit(mapBlockLotNum).then(function (isCannabisPermitResponse) {
+            isOnCannabisPermit = isCannabisPermitResponse.features.length !== 0;
+            var cannabisFeatures = isCannabisPermitResponse.features;
 
+            if (isOnMcd && isOnCannabisPermit) {
+              var popupArrItems = [];
+              isOnMcd = false;
+
+              cannabisFeatures.forEach(function(feature) {
+                var currCannabisAttribute = feature.attributes;
+                var currCannabisPopupHtml = getPopupForSearch(false, true, currCannabisAttribute, zoningLayer);
+                var currCannabisTradeName = feature.attributes.dba_name;
+                popupArrItems.push(
+                  {
+                    popupTemplate: {
+                      title: currCannabisTradeName,
+                      content: currCannabisPopupHtml
+                    }
+                  }
+                )
+              });
+
+<<<<<<< HEAD
       */
+=======
+              mcdFeatures.forEach(function(feature) {
+                var currMcdAttribute = feature.attributes;
+                var currMcdHtml = getPopupForSearch(true, false, currMcdAttribute, zoningLayer);
+                var currMcdTradeName = feature.attributes.dba;
+                popupArrItems.push(
+                  {
+                    popupTemplate: {
+                      title: currMcdTradeName,
+                      content: currMcdHtml
+                    }
+                  }
+                )
+              });
+
+              view.popup.open({
+                features: popupArrItems,
+                location: geometry.extent.center
+              });
+            } else if (isOnCannabisPermit) {
+              console.log('is a cannabis permit');
+              var cannabisPermitAttributes = isCannabisPermitResponse.features[0].attributes;
+              isOnMcd = false;
+              isOnCannabisPermit = true;
+              permitStatus = cannabisPermitAttributes.PermitStatus;
+              searchPopupHtml = getPopupForSearch(isOnMcd, isOnCannabisPermit, cannabisPermitAttributes, zoningLayer);
+              var popupArrItems = [];
+              cannabisFeatures.forEach(function(feature) {
+                var currCannabisAttribute = feature.attributes;
+                var currCannabisPopupHtml = getPopupForSearch(false, true, currCannabisAttribute, zoningLayer);
+                popupArrItems.push(
+                  {
+                    popupTemplate: {
+                      title: '',
+                      content: currCannabisPopupHtml
+                    }
+                  }
+                )
+              });
+
+              view.popup.open({
+                features: popupArrItems,
+                location: geometry.extent.center
+              });
+            } else if (isOnMcd) {
+              var popupArrItems = [];
+              console.log('clicked on mcd')
+              mcdFeatures.forEach(function(feature) {
+                var currMcdAttribute = feature.attributes;
+                var currMcdHtml = getPopupForSearch(true, false, currMcdAttribute, zoningLayer);
+                popupArrItems.push(
+                  {
+                    popupTemplate: {
+                      title: '',
+                      content: currMcdHtml
+                    }
+                  }
+                )
+              });
+
+              view.popup.open({
+                features: popupArrItems,
+                location: geometry.extent.center
+              });
+            } else {
+              if (!firstResultAttributes.ADDRESS && !firstResultAttributes.ADDRESSSIMPLE) {
+                SearchCtrl.getGeocoderResponse(mapBlockLotNum)
+                .then(function(response) {
+                  var jsonResponse = JSON.parse(response);
+                  var clickedParcelAttributes = jsonResponse.features[0].attributes;
+                  searchPopupHtml = getPopupForSearch(isOnMcd, isOnCannabisPermit, clickedParcelAttributes, zoningLayer);
+                  view.popup.open({
+                    content: searchPopupHtml,
+                    location: geometry.extent.center
+                  });
+                })
+              } else {
+                searchPopupHtml = getPopupForSearch(isOnMcd, isOnCannabisPermit, firstResultAttributes, zoningLayer);
+                view.popup.open({
+                  content: searchPopupHtml,
+                  location: geometry.extent.center
+                });
+              }
+            }
+          });
+        });
+      });
+>>>>>>> eb303f8d0f49051a5b8cbdd4b4a51247b981d21f
     }
 
     return {
@@ -1492,7 +1798,13 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
     var GEOCODER_URL = theProtocol + '://sfplanninggis.org/cpc_geocode/?search=';
 
     function showPopupChoices(searchResponse) {
+<<<<<<< HEAD
       console.log('in show popup choice function');
+=======
+      var uiSelectors = UICtrl.getUiSelectors();
+      $(uiSelectors.modalHeader).css('background', '#1C3E57');
+      $(uiSelectors.closeModal).css('color', 'white');
+>>>>>>> eb303f8d0f49051a5b8cbdd4b4a51247b981d21f
       var modalHtml = '';
       var featureNum = searchResponse.features.length;
       var multipleResultTitleStr = 'Multiple Results - Please select one';
@@ -1506,12 +1818,12 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
       UICtrl.displayModal(multipleResultTitleStr, modalHtml);
     }
 
-    function getGeocoderResponse(geocoderUrl, searchVal) {
-      return $.get(geocoderUrl)
-        .then(function (response) {
-          return JSON.parse(response)
-        })
-    }
+    // function getGeocoderResponse(geocoderUrl, searchVal) {
+    //   return $.get(geocoderUrl)
+    //     .then(function (response) {
+    //       return JSON.parse(response)
+    //     })
+    // }
 
     function isNumeric(sText) {
       var validChars = "-0123456789.";
@@ -1775,8 +2087,11 @@ function highLightTabClicked(event) {
   var legendAlreadySelected = event.classList.contains('selected')
   if (legendAlreadySelected) {
     var nonActiveLogoSrc = imageSrc.replace('-active', '');
+<<<<<<< HEAD
     console.log(nonActiveLogoSrc);
     console.log(imageId)
+=======
+>>>>>>> eb303f8d0f49051a5b8cbdd4b4a51247b981d21f
     $('#' + imageId).attr('src', nonActiveLogoSrc);
     $('.tab-display-container').css('display', 'none');
     event.classList.remove('selected');
@@ -1792,7 +2107,10 @@ function highLightTabClicked(event) {
 }
 
 function showLegendOnMobileTab() {
+<<<<<<< HEAD
   console.log('in legend')
+=======
+>>>>>>> eb303f8d0f49051a5b8cbdd4b4a51247b981d21f
   $('#mobile-legend').css('display', 'block');
   $('#filter-container').css('display', 'none');
   $('#legend-logo').attr('src', 'images/legend-active.svg');
@@ -1800,7 +2118,10 @@ function showLegendOnMobileTab() {
 }
 
 function showFilterOnMobileTab() {
+<<<<<<< HEAD
   console.log('in filter')
+=======
+>>>>>>> eb303f8d0f49051a5b8cbdd4b4a51247b981d21f
   $('#mobile-legend').css('display', 'none');
   $('#filter-container').css('display', 'block');
   $('#locations-logo').attr('src', 'images/Location-active.svg')
