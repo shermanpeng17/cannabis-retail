@@ -269,7 +269,9 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
       },
 
       changeMapHeightAndHandleTabDisplay: function (popupIsVisible) {
-        console.log('in change map height func')
+        var mapView = MapCtrl.getView();
+
+
         var contentContainerHeight = $(uiSelectors.contentContainer).height();
         var tabHeightsAtBottomOfScreen = 60;
 
@@ -431,10 +433,27 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
 
     view.when(function () {
       view.on('click', executeIdentifyTask);
+      // if (view.popup.visible) {
+      //   console.log('popup already here yo')
+      // }
       view.watch("popup.visible", function (newVal, oldVal) {
-        if (App.isOnMobile()) {
-          UICtrl.changeMapHeightAndHandleTabDisplay(newVal);
+        // console.log('new value for popup: ', newVal)
+        if (newVal === true) {
+          if (App.isOnMobile()) {
+            UICtrl.changeMapHeightAndHandleTabDisplay(newVal);
+          }
+        } else if (newVal === false) {
+            // UICtrl.changeMapHeightAndHandleTabDisplay(newVal);
+            // console.log('popup closed...');
+            // var uiSelectors = UICtrl.getUiSelectors();
+            // var contentContainerHeight = $(uiSelectors.contentContainer).height();
+            // var tabHeightsAtBottomOfScreen = 60;
+            // var newMapHeight = contentContainerHeight - tabHeightsAtBottomOfScreen;
+            // $(uiSelectors.mapContainer).css('height', newMapHeight.toString());
+
         }
+        
+        view.popup.collapsed = false; 
       })
     });
 
@@ -771,8 +790,6 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
             var layerName = result.layerName;
             var featureAttributes = feature.attributes;
             var geometry = feature.geometry;
-            // var tempPolygon = new Polygon(geometry)
-
 
             if (layerName === 'Permitted') {
               insideZoning = 'Allowed';
@@ -785,13 +802,13 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
               var isMcd = true;
               var isCannabisPermit = false;
               var popupHtml = getPopupForSearch(isMcd, isCannabisPermit, featureAttributes, insideZoning);
+
               feature.popupTemplate = {
                 title: mcdTradeName,
                 content: popupHtml
               }
 
             } else if (layerName === 'CannabisLocations_OOC') {
-              console.log(result)
               var cannabisTradeName = result.feature.attributes.dba_name;
               var isMcd = false;
               var isCannabisPermit = true;
@@ -829,17 +846,30 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
           console.log(filteredPopup);
           // add popup for regular parcel. 
           if (filteredPopup.length === 0) {
-            SearchCtrl.getGeocoderResponse(parcelNum).then(function(response) {
-              var jsonResponse = JSON.parse(response);
-              var attributes = jsonResponse.features[0].attributes;
+            if (parcelNum === undefined) {
               var isMcd = false;
               var isCannabisPermit = false;
-              var popupHtml = getPopupForSearch(isMcd, isCannabisPermit, attributes, insideZoning);
+              var attributeVals = undefined;
+              var popupHtml = getPopupForSearch(isMcd, isCannabisPermit, attributeVals, insideZoning);
               view.popup.open({
                 content: popupHtml,
                 location: event.mapPoint
               })
-            })
+            } else {
+              SearchCtrl.getGeocoderResponse(parcelNum).then(function(response) {
+                var jsonResponse = JSON.parse(response);
+                var attributes = jsonResponse.features[0].attributes;
+                var isMcd = false;
+                var isCannabisPermit = false;
+                var popupHtml = getPopupForSearch(isMcd, isCannabisPermit, attributes, insideZoning);
+                view.popup.open({
+                  content: popupHtml,
+                  location: event.mapPoint
+                })
+                document.getElementById("map").style.cursor = "auto";
+              })
+            }
+
           } else {
             if (filteredPopup.length > 0) {
               view.popup.open({
@@ -983,20 +1013,22 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
         </table>
         `
       } else if (!isMcd && !isCannabisPermit) {
-        var address = attributes.ADDRESS || attributes.ADDRESSSIMPLE;
-        if (!address) {
-          address = attributes.mapblklot;
+        if (attributes !== undefined) {
+          var address = attributes.ADDRESS || attributes.ADDRESSSIMPLE;
+          if (!address) {
+            address = attributes.mapblklot;
+          }
+          popupHtml +=
+          `
+            <div class="align-left retail-name"> ${address} </div>
+            <table class="status-section" >
+              <tr>
+                <td class="attribute">Status</td>
+                <td class="attribute-detail">No permits associated with this location</td>
+              </tr>
+            </table>
+          `
         }
-        popupHtml +=
-        `
-          <div class="align-left retail-name"> ${address} </div>
-          <table class="status-section" >
-            <tr>
-              <td class="attribute">Status</td>
-              <td class="attribute-detail">No permits associated with this location</td>
-            </tr>
-          </table>
-      `
       }
 
       if (zoningLayer !== 'none') {
@@ -1387,6 +1419,9 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
                 });
               }
             }
+            if (App.isOnMobile()) {
+              view.popup.collapsed = false; 
+            }
           });
         });
       });
@@ -1433,7 +1468,7 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
         }
 
         if (mapLayerNum !== SUPERVISOR_DISTRICT_LAYER_NUM) {
-          var bufferLayerNum = mapLayerNum + 1;
+          var bufferLayerNum = mapLayerNum + 5;
           sublayer = mapImageLayer.findSublayerById(parseInt(bufferLayerNum));
           sublayer.visible = !sublayer.visible;
         }
@@ -1697,8 +1732,34 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
         if (currClassName.indexOf('btn-search') !== -1 || currClassName.indexOf('fa-search') !== -1 || currClassName.indexOf('input-group-append') !== -1) {
           var searchStr = $('#addressInput').val();
           handleSearching(searchStr);
-
         }
+        console.log(currClassName)
+        
+        var clickedOnClosePopUp = currClassName.indexOf('esri-icon-close')
+
+        if (currClassName.indexOf('esri-popup__button esri-popup__feature-menu-button') !== -1) {
+          // console.log('you clicked me!');
+          var popupContent = $('.esri-popup__content');
+          if (popupContent.height() !== 0)  {
+            $('.esri-popup__pagination-previous').css({'margin-left': '30px'});
+            $('.esri-popup__pagination-next').css({'margin-right': '30px'});
+            // console.log('yes!')
+          } else {
+            $('.esri-popup__pagination-previous').css({'margin-left': '0px'});
+            $('.esri-popup__pagination-next').css({'margin-right': '0px'});
+          }
+        }
+
+        // esri-popup__feature-menu-item--selected 
+        // console.log(currClassName)
+        var clickedOnListItemInPopup = currClassName.indexOf('esri-popup__feature-menu-item') !== -1 || currClassName.indexOf('esri-popup__feature-menu-title') !== -1 || currClassName.indexOf('esri-icon-check-mark') !== -1 || currClassName.indexOf('esri-popup__feature-menu-title') !== -1 || parentElementClassName.indexOf('esri-popup__feature-menu-title') !== -1;
+        if (clickedOnListItemInPopup) {
+          // console.log('clicked on item')
+          $('.esri-popup__pagination-previous').css({'margin-left': '0px'});
+          $('.esri-popup__pagination-next').css({'margin-right': '0px'});
+        }
+
+        // 16f4876c154-widget-0-popup-content
 
         // User has selected on a choice at this point
         if ((currClassName.indexOf(MULTIPLE_BUSINESS_SELECTION_CLASS) !== -1) && (parentElementClassName === 'messi-button-container')) {
@@ -1734,6 +1795,8 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
         if (clickedType === 'checkbox') {
           MapCtrl.updateLayerVisibility(event)
         }
+
+        
       })
 
     }
