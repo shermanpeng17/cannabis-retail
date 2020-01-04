@@ -1437,10 +1437,11 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
       },
 
       updateLayerVisibility: function (event) {
-        var SUPERVISOR_DISTRICT_LAYER_NUM = cannabisRetailLayerMapToNumber.supervisorDistLayerNum;
+        var superDistLayerNum = cannabisRetailLayerMapToNumber.supervisorDistLayerNum;
         var mapLayerNum = Number(event.target.value);
         var sublayer = mapImageLayer.findSublayerById(parseInt(mapLayerNum));
         var checkBoxChecked = event.target.checked;
+        var bufferLayerNum;
         sublayer.visible = !sublayer.visible;
 
         var currLayerUrl = CANNABIS_RETAIL_SERVICE_URL + '/' + mapLayerNum;
@@ -1467,10 +1468,16 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
             })
         }
 
-        if (mapLayerNum !== SUPERVISOR_DISTRICT_LAYER_NUM) {
-          var bufferLayerNum = mapLayerNum + 5;
-          sublayer = mapImageLayer.findSublayerById(parseInt(bufferLayerNum));
-          sublayer.visible = !sublayer.visible;
+        if (mapLayerNum !== superDistLayerNum) {
+          if (mapLayerNum === cannabisRetailLayerMapToNumber.mcdLayerNum || mapLayerNum === cannabisRetailLayerMapToNumber.schoolLayerNum) {
+            bufferLayerNum = mapLayerNum + 1;
+          } else {
+            bufferLayerNum = mapLayerNum + 5;
+          }
+          if (bufferLayerNum) {
+            sublayer = mapImageLayer.findSublayerById(parseInt(bufferLayerNum));
+            sublayer.visible = !sublayer.visible;
+          }
         }
       },
 
@@ -1743,10 +1750,11 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
           if (popupContent.height() !== 0)  {
             $('.esri-popup__pagination-previous').css({'margin-left': '30px'});
             $('.esri-popup__pagination-next').css({'margin-right': '30px'});
-            // console.log('yes!')
+            // $('.esri-popup__main-container').css({'border-top-right-radius': '0px', 'border-top-left-radius': '0px'})
           } else {
             $('.esri-popup__pagination-previous').css({'margin-left': '0px'});
             $('.esri-popup__pagination-next').css({'margin-right': '0px'});
+            // $('.esri-popup__main-container').css({'border-top-right-radius': '8px', 'border-top-left-radius': '8px'})
           }
         }
 
@@ -1754,6 +1762,7 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
         // console.log(currClassName)
         var clickedOnListItemInPopup = currClassName.indexOf('esri-popup__feature-menu-item') !== -1 || currClassName.indexOf('esri-popup__feature-menu-title') !== -1 || currClassName.indexOf('esri-icon-check-mark') !== -1 || currClassName.indexOf('esri-popup__feature-menu-title') !== -1 || parentElementClassName.indexOf('esri-popup__feature-menu-title') !== -1;
         if (clickedOnListItemInPopup) {
+          $('.esri-popup__main-container').css({'border-top-right-radius': '8px', 'border-top-left-radius': '8px'})
           // console.log('clicked on item')
           $('.esri-popup__pagination-previous').css({'margin-left': '0px'});
           $('.esri-popup__pagination-next').css({'margin-right': '0px'});
