@@ -27,6 +27,23 @@ html, body, #map {
   width: 100% !important;
 }
 
+/*
+.esri-zoom .esri-interactive {
+  border: 1px solid 
+} */
+
+/* #1C3E57; */
+
+.esri-zoom {
+  border: 2px solid #D3D3D3;
+
+}
+
+.esri-icon-minus, .esri-icon-plus {
+  color: #1C3E57;
+  font-weight: 800;
+}
+
 .esri-ui-top-left {
   right: 3px !important;
   top: 10px !important;
@@ -142,6 +159,11 @@ html, body, #map {
 
 .input-group-append button {
   border-radius: 0 6px 6px 0;
+}
+
+.btn-search .fa-search {
+  vertical-align: middle !important;
+  margin-bottom: 2px;
 }
 
 /* End Header */
@@ -539,6 +561,10 @@ a#list-view-link {
   width: 25px;
 }
 
+article .esri-popup__content {
+  margin: 0 12px;
+}
+
 /* checkboxes */
 .custom-checkbox .custom-control-input:checked~.custom-control-label::before{
   background-color:black;
@@ -635,7 +661,9 @@ button.close:hover {
 }
 
 .esri-popup__footer {
-  padding: 6px 0 0 0;
+  padding: 0 !important;
+  border-bottom-right-radius: 8px;
+  border-bottom-left-radius: 8px;
 }
 
 .esri-popup__button {
@@ -655,7 +683,7 @@ font-size: 14px !important;
 }
 
 .esri-popup__button:hover {
-background-color: white;
+  background-color: #E9E9E9;
 }
 
 .esri-popup__inline-actions-container {
@@ -675,9 +703,20 @@ display: none;
 }
 
 
+
+/* .esri-popup__pointer-direction {
+  background: red
+} */
+
+
 .cannabis-permit-container {
   text-align: left;
 }
+
+.filler-space {
+  height: 20px;
+}
+
 
 .cannabis-permit {
   font-size: 15px;
@@ -738,7 +777,6 @@ display: none;
   box-sizing: border-box;
   padding: 15px;
   margin-top: 15px;
-  margin-bottom: 10px;
 }
 
 .cannabis-zoning {
@@ -844,23 +882,19 @@ display: none;
   transform: rotate(180deg);
 }
 
-.esri-popup__pagination-next-icon {
-  content: url(../images/Chevron-side.svg);
+.esri-popup__pagination-previous-icon {
+  content: url(../images/Chevron-Slate-Blue.svg);
   transform: rotate(180deg);
 }
 
-.esri-popup__pagination-previous-icon {
-  content: url(../images/Chevron-side.svg);
-}
-
 .esri-popup__feature-menu-button {
-  color: #4F66EE;
+  color: #1C3E57 !important;
   font-size: 20px!important;
-  font-weight: 500;
+  font-weight: 500 !important;
 }
 
 .esri-popup--feature-menu-open .esri-popup__feature-menu-button {
-  background: white;
+  background: #E9E9E9;
   color: #4F66EE;
 }
 
@@ -1058,7 +1092,7 @@ h2.esri-popup__feature-menu-header {
     bottom: 60px !important;
     border-radius: 0;
     box-shadow: inset 0px -40px 41px -44px rgba(0,0,0,0.2);
-
+    
   }
   .tab-display-container {
     height: 220px;
@@ -1068,6 +1102,9 @@ h2.esri-popup__feature-menu-header {
   }
   .esri-popup__content {
     margin: 0 15px 0 15px;
+  }
+  .zoning-information {
+    margin-bottom: 30px;
   }
 }
 
