@@ -384,11 +384,8 @@ a#list-view-link {
   font-size: 16px;
   line-height: 27px;
   padding-top: 20px;
-  /* margin-top: 30px; */
   text-align: left;
 }
-
-
 
 .each-permission {
   display: flex;
@@ -397,13 +394,22 @@ a#list-view-link {
   padding-top: 10px;
 }
 
+#neighborhood-list {
+  list-style: none;
+  padding: 0px;
+  padding-left: 5px;
+}
+
+#neighborhood-list li {
+  cursor: pointer;
+  color: #4F66EE;
+  text-decoration: underline;
+}
+
 .zoning-description {
   text-align: left;
-  /* margin-left: 45px; */
-  /* padding-left: 45px; */
   font-size: 14px;
   color: #666666;
-  /* padding-top: 0; */
   line-height: 1.4;
   margin-top: -10px;
   padding: 0 45px;
@@ -726,8 +732,11 @@ display: none;
   border-radius: 0;
 }
 
+.multiple-locations-inside-buffer{
+  width: 100%;
+}
+
 .multiple-locations-inside-buffer tr:not(:last-child) {
-  /* border: 3px solid #E9E9E9; */
   border-bottom: 3px solid #E9E9E9;;
 }
 
@@ -735,8 +744,11 @@ display: none;
   /* padding: 0; */
   /* padding: 0px 0px 8px 0px; */
   margin: 0;
-  text-align: left;
   padding-left: 10px;
+}
+
+.multiple-locations-inside-buffer td {
+  text-align: left;
 }
 
 .multiple-location-td__image {
@@ -744,7 +756,8 @@ display: none;
   border-right:  3px solid #E9E9E9; 
 }
 
-.multiple-location-td__info {
+.multiple-location-td__info a {
+  display: inline-block;
   padding: 10px 0;
 }
 
@@ -753,16 +766,9 @@ display: none;
   padding-bottom: 5px;
 }
 
-/* .esri-popup--is-docked-bottom-center::before {
-  content: none;
-} */
-
-
-
 .esri-view-width-xsmall .esri-popup--is-docked-bottom-center .esri-popup__main-container.esri-popup--is-collapsible:before {
   content: none;
 }
-
 
 .cannabis-permit-container {
   text-align: left;
@@ -788,12 +794,10 @@ display: none;
   margin-bottom: 10px;
 }
 
-
 .align-left {
   text-align: left;
   font-size: 14px;
 }
-
 
 .attribute {
   background-color: #f1f1f1;
@@ -841,7 +845,6 @@ display: none;
   padding-bottom: 5px;
   line-height: 24px;
 }
-
 
 
 .cannabis-zoning-image-container{

@@ -6,7 +6,7 @@ if (window.location.protocol == "https:") {
   theProtocol = "http";
 }
 
-require(["esri/Map", "esri/views/MapView", "esri/Graphic", "esri/tasks/support/BufferParameters", "esri/tasks/GeometryService", "esri/geometry/geometryEngine", "esri/geometry/SpatialReference", "esri/layers/FeatureLayer", "esri/layers/MapImageLayer", "esri/widgets/BasemapToggle", "esri/renderers/SimpleRenderer", "esri/tasks/IdentifyTask", "esri/tasks/support/IdentifyParameters", "esri/geometry/geometryEngine", "esri/geometry/Polygon", "esri/tasks/QueryTask", "esri/tasks/support/Query", "esri/renderers/SimpleRenderer"], function (Map, MapView, Graphic, BufferParameters, GeometryService, geometryEngine, SpatialReference, FeatureLayer, MapImageLayer, BasemapToggle, SimpleRenderer, IdentifyTask, IdentifyParameters, geometryEngine, Polygon, QueryTask, Query, SimpleRenderer) {
+require(["esri/Map", "esri/views/MapView", "esri/geometry/support/meshUtils", "esri/geometry/Mesh", "esri/Graphic", "esri/tasks/support/BufferParameters", "esri/tasks/GeometryService", "esri/geometry/geometryEngine", "esri/geometry/SpatialReference", "esri/layers/FeatureLayer", "esri/layers/MapImageLayer", "esri/widgets/BasemapToggle", "esri/renderers/SimpleRenderer", "esri/tasks/IdentifyTask", "esri/tasks/support/IdentifyParameters", "esri/geometry/geometryEngine", "esri/geometry/Polygon", "esri/tasks/QueryTask", "esri/tasks/support/Query", "esri/renderers/SimpleRenderer"], function (Map, MapView, meshUtils, Mesh, Graphic, BufferParameters, GeometryService, geometryEngine, SpatialReference, FeatureLayer, MapImageLayer, BasemapToggle, SimpleRenderer, IdentifyTask, IdentifyParameters, geometryEngine, Polygon, QueryTask, Query, SimpleRenderer) {
 
   var SearchCtrl = function () {
     var GEOCODER_URL = theProtocol + '://sfplanninggis.org/cpc_geocode/?search=';
@@ -97,7 +97,6 @@ require(["esri/Map", "esri/views/MapView", "esri/Graphic", "esri/tasks/support/B
     }
   }();
 
-
   var UICtrl = function () {
     var uiSelectors = {
       searchBox: '#searchbox',
@@ -125,7 +124,8 @@ require(["esri/Map", "esri/views/MapView", "esri/Graphic", "esri/tasks/support/B
       closeModal: '.close',
       zoningDescription: '.zoning-description',
 
-      popupBottomPointerArrow: '.esri-popup__pointer-direction'
+      popupBottomPointerArrow: '.esri-popup__pointer-direction',
+      neighborhoodList: '#neighborhood-list'
     }
 
     var cannabisOnHoldPermitName = 'CannabisLocations_OOC - On Hold';
@@ -146,28 +146,36 @@ require(["esri/Map", "esri/views/MapView", "esri/Graphic", "esri/tasks/support/B
       switch (layerName) {
         case cannabisOnHoldPermitName:
           layerInfo.icon = 'images/On-Hold-pin.svg';
+          layerInfo.layerName = 'cannabisPermitOnHold';
           break;
         case cannabisProcessingPermitName:
           layerInfo.icon ='images/Processing-pin.svg';
+          layerInfo.layerName = 'cannabisPermitProcessing';
           break;
         case cannabisSubmittedPermitName:
-          layerInfo.icon ='images/Submitted-pin.svg';
+          layerInfo.icon = 'images/Submitted-pin.svg';
+          layerInfo.layerName = 'cannabisPermitSubmitted';
           break;
         case cannabisApprovedPermitName:
           layerInfo.icon ='images/Approved-pin.svg';
+          layerInfo.layerName = 'cannabisPermitsApproved';
           break;
         case cannabisUnderConstructionPermitName:
           layerInfo.icon ='images/Under-construction-pin.svg';
+          layerInfo.layerName = 'cannabisPermitsConstruction';
           break;
         case mcdName:
           layerInfo.icon ='images/MCDs.svg';
+          layerInfo.layerName = 'mcds';
           break;
         case schoolName:
           layerInfo.icon ='images/school.svg';
+          layerInfo.layerName = 'schools'
           break;
         default:
           break;  
       }
+      layerInfo.id = feature.attributes.OBJECTID;
       return layerInfo
     }
 
@@ -201,17 +209,11 @@ require(["esri/Map", "esri/views/MapView", "esri/Graphic", "esri/tasks/support/B
         var view = MapCtrl.getView();
         var multipleLocationPopupHtml = '';
         var isOnMultipleLocationView = PopupCtrl.getIsOnMultipleView();
-        console.log(isOnMultipleLocationView);
 
-        view.watch("popup.visible", function (newVal, oldVal) {
-          console.log(newVal)
-          console.log(oldVal)
-        })
+
         if (isOnMultipleLocationView) {
-          console.log('is on multi viiiiiew');
           var popup = document.querySelector('.esri-popup__content');
           popup.classList.add('no-margin-popup')
-          console.log(popup.classList)
           $('.esri-popup__content').addClass('no-margin-popup');
         }
         multipleLocationPopupHtml += '<table class="multiple-locations-inside-buffer">' + 
@@ -224,7 +226,7 @@ require(["esri/Map", "esri/views/MapView", "esri/Graphic", "esri/tasks/support/B
             multipleLocationPopupHtml += '<tr>'
             multipleLocationPopupHtml += 
               '<td class="multiple-location-td__image"><img class="multiple-location__icon" src="' + locationIconAndInfo.icon + '">' + 
-              '<td class="multiple-location-td__info"><a href=""><p class="multiple-location__address">' + locationIconAndInfo.address + '</p><p class="multiple-location__name">' + locationIconAndInfo.name + '</p></a></td>'
+              '<td class="multiple-location-td"><p class="multiple-location-td__info" id="' + locationIconAndInfo.id + '"title=' + locationIconAndInfo.layerName + '>' + locationIconAndInfo.address + '</p><p class="multiple-location-td__info">' + locationIconAndInfo.name + '</p></td>'
             multipleLocationPopupHtml += '</tr>'
           });
         })
@@ -448,7 +450,8 @@ require(["esri/Map", "esri/views/MapView", "esri/Graphic", "esri/tasks/support/B
       underConstructionLayerNum: '',
       approvedLayerNum: '',
       cannabisLocationsLayer: '',
-      parcelLabelLayerNum: ''
+      parcelLabelLayerNum: '',
+      neighborhoodLayerNum: ''
     }
 
     var labelingForCannabisLayers = {
@@ -470,7 +473,7 @@ require(["esri/Map", "esri/views/MapView", "esri/Graphic", "esri/tasks/support/B
 
     var polygonColoringForInputSearch = {
       type: 'simple-fill',
-      color: [146, 148, 150, 0.25],
+      color: [146, 148, 150, 1],
       style: 'solid',
       outline: {
         color: [79, 102, 238, 1],
@@ -501,12 +504,9 @@ require(["esri/Map", "esri/views/MapView", "esri/Graphic", "esri/tasks/support/B
       symbol: polygonColoringForInputSearch
     });
 
-
     map = new Map({
       basemap: 'gray-vector'
     });
-
-    console.log(map)
 
     view = new MapView({
       container: 'map',
@@ -526,12 +526,9 @@ require(["esri/Map", "esri/views/MapView", "esri/Graphic", "esri/tasks/support/B
       nextBasemap: "hybrid"
     });
 
-
-
     view.when(function () {
       view.on('click', executeIdentifyTask);
       view.watch("popup.visible", function (newVal, oldVal) {
-        console.log('popup visible noooow')
         if (popupItemsArr && popupItemsArr.length > 1) {
           UICtrl.changePopupFooterColor();
         }
@@ -766,43 +763,40 @@ require(["esri/Map", "esri/views/MapView", "esri/Graphic", "esri/tasks/support/B
             break;
           case 'Parcel Labels':
             cannabisRetailLayerMapToNumber.parcelLabelLayerNum = currLayerId;
+            break;
+          case 'Neighborhoods_Project':
+            cannabisRetailLayerMapToNumber.neighborhoodLayerNum = currLayerId;
+            break;
           default:
             break;
         }
       });
     }
+    
 
     /*
       Add a feature layer to the map based on search results
     */
-    function addClickedPolygonLayerToMap(geometry, identifyResults) {
-
-      console.log('in add click polygon layer to map')
-      // map.remove(polygonLayerAddedToMap);
-      map.removeAll();
-
-      var features = [identifyResults[0].feature];
-      var polygonColoringForInputSearch = {
-        type: 'simple-fill',
-        color: [146, 148, 150, 0.25],
-        style: 'solid',
-        outline: {
-          color: [79, 102, 238, 1],
-          width: 2
-        }
-      };
-      var simpleRenderer = new SimpleRenderer({
-        symbol: polygonColoringForInputSearch
+    function addPolygonToMap(identifyResults, polygonColor, centerOfPolygonColor) {
+      console.log(view)
+      var geometry = identifyResults.geometry;
+      var centerOfPolygon = {
+        type: 'point',
+        longitude: geometry.extent.center.longitude,
+        latitude: geometry.extent.center.latitude
+      }
+      var polygonGraphic = new Graphic({
+        geometry: geometry,
+        symbol: polygonColor
       });
-
-      var featureLayerToAddToMap = new FeatureLayer({
-        objectIdField: 'ObjectID',
-        source: features,
-        renderer: simpleRenderer,
-        outFields: ["*"],
+      var pointGraphic = new Graphic({
+        geometry: centerOfPolygon,
+        symbol: centerOfPolygonColor  
       });
-      polygonLayerAddedToMap = featureLayerToAddToMap;
-      map.add(featureLayerToAddToMap)
+      console.log(polygonGraphic)
+      view.graphics.add(polygonGraphic);
+      view.graphics.add(pointGraphic);
+      console.log(view)
     }
 
     function isLayerTurnedOn(layerName) {
@@ -812,6 +806,9 @@ require(["esri/Map", "esri/views/MapView", "esri/Graphic", "esri/tasks/support/B
       return layerToCheck[0].visible;
     }
 
+    /*
+      This function returns a buffer promise
+    */
     function getBufferGeometry(geometryToBuffer) {
       var geometryService = new GeometryService({
         url: "https://sfplanninggis.org/arcgiswa/rest/services/Utilities/Geometry/GeometryServer"
@@ -866,17 +863,17 @@ require(["esri/Map", "esri/views/MapView", "esri/Graphic", "esri/tasks/support/B
               }
             }
           }));
-          view.graphics.add(new Graphic({
-            geometry: centerOfPolygon,
-            symbol: {
-              type: "simple-marker", // autocasts as new SimpleMarkerSymbol()
-              color: [79, 102, 238, 1],
-              outline: {
-                color: [79, 102, 238, 1],
-                width: 2
-              }
-            }
-          }))
+          // view.graphics.add(new Graphic({
+          //   geometry: centerOfPolygon,
+          //   symbol: {
+          //     type: "simple-marker", // autocasts as new SimpleMarkerSymbol()
+          //     color: [79, 102, 238, 1],
+          //     outline: {
+          //       color: [79, 102, 238, 1],
+          //       width: 2
+          //     }
+          //   }
+          // }))
         })
         .catch(function (err) {
           console.log(err)
@@ -888,7 +885,6 @@ require(["esri/Map", "esri/views/MapView", "esri/Graphic", "esri/tasks/support/B
       Also runs a check to see if it is inside a permitted layer
     */
     function executeIdentifyTask(event) {
-
       var identifyTask = new IdentifyTask(CANNABIS_RETAIL_SERVICE_URL);
       var identifyParams = new IdentifyParameters();
 
@@ -925,6 +921,7 @@ require(["esri/Map", "esri/views/MapView", "esri/Graphic", "esri/tasks/support/B
           map.remove(polygonLayerAddedToMap)
           var results = response.results
           return results.map(function (result) {
+            console.log(result)
             var feature = result.feature;
             var layerName = result.layerName;
             var featureAttributes = feature.attributes;
@@ -974,7 +971,9 @@ require(["esri/Map", "esri/views/MapView", "esri/Graphic", "esri/tasks/support/B
               });
               zoomInToSearchPolygon(polygonToAddToMap);
               polygonLayerAddedToMap = layerToAddToMap;
+              // console.log('')
               map.add(polygonLayerAddedToMap);
+
               feature.checkForSchoolBuffer = true;
               feature.zoning = insideZoning;
               // addBufferAroundSearchPolygonHelper(parcelGeomtry);
@@ -1041,23 +1040,6 @@ require(["esri/Map", "esri/views/MapView", "esri/Graphic", "esri/tasks/support/B
           if (App.isOnMobile()) {
             UICtrl.changeToNewMapHeight();
           }
-          // var itemToCheckIfInsideBuffer = arrayOfPopupTemplates.filter(function(popup) {
-          //   return popup.checkForSchoolBuffer === true;
-          // })[0];
-          // if (itemToCheckIfInsideBuffer) {
-          //   var tempGeom = itemToCheckIfInsideBuffer.geometry;
-          //   showPopupsForRegularParcels(tempGeom, parcelNum, popupLocation, insideZoning);
-          // } else {
-          //   // var clickedOnSomethingUseful = arrayOfPopupTemplates.length !== 0;
-          //   // if (clickedOnSomethingUseful) {
-          //   //   showPopupForZoning(insideZoning, popupLocation)
-          //   // } else {
-          //     if (App.isOnMobile()) {
-          //       UICtrl.changeToNewMapHeight();
-          //     }
-          //   // }
-          //   console.log(arrayOfPopupTemplates)
-          // }
         }
       }
     }
@@ -1110,17 +1092,18 @@ require(["esri/Map", "esri/views/MapView", "esri/Graphic", "esri/tasks/support/B
             url: cannabisMapServiceUrl + '/' + cannabisRetailLayerMapToNumber.mcdLayerNum,
           }),       
         ];
+        console.log(layersToCheckAgainstBuffer)
         var spatialRelationship = 'intersects';
-
         var promiseArr = layersToCheckAgainstBuffer.map(function(featureLayer) {
           return runSpatialOnGeometryAndLayer(bufferGeom, featureLayer, spatialRelationship)
         });
-        return Promise.all(promiseArr)
+        return Promise.all(promiseArr);
       })
       .then(function(spatialQueryResponse) {
         itemsInsideBufferResponse = spatialQueryResponse.filter(function(eachResponse) {
           return eachResponse.features.length !== 0;
         })
+        console.log(spatialQueryResponse)
         return itemsInsideBufferResponse;
       })
       .then(function (itemsInsideBuffer) {
@@ -1333,7 +1316,6 @@ require(["esri/Map", "esri/views/MapView", "esri/Graphic", "esri/tasks/support/B
       popupHtml += '</div>'
       return popupHtml;
     }
-
 
     function getZoningInformartionForPopup(zoningName, isMcd) {
       var copyOfZoningName = zoningName;
@@ -1597,7 +1579,6 @@ require(["esri/Map", "esri/views/MapView", "esri/Graphic", "esri/tasks/support/B
                 var currCannabisAttribute = feature.attributes;
                 var currCannabisPopupHtml = getPopupForSearch(false, true, currCannabisAttribute, zoningLayer);
                 var currCannabisTradeName = currCannabisAttribute.dba_name;
-
                 popupArrItems.push(
                   {
                     popupTemplate: {
@@ -1638,6 +1619,91 @@ require(["esri/Map", "esri/views/MapView", "esri/Graphic", "esri/tasks/support/B
       });
     }
 
+    function performSearchQuery(layerName, id) {
+      var mapServiceUrl = CANNABIS_RETAIL_SERVICE_URL;
+      if (layerName === 'cannabisPermitOnHold') {
+      } else if (layerName === 'cannabisPermitProcessing') {
+        mapServiceUrl += '/' + cannabisRetailLayerMapToNumber.onHoldLayerNum;
+      } else if (layerName === 'cannabisPermitSubmitted') {
+        mapServiceUrl += '/' + cannabisRetailLayerMapToNumber.submittedLayerNum;
+      } else if (layerName === 'cannabisPermitsApproved') {
+        mapServiceUrl += '/' + cannabisRetailLayerMapToNumber.approvedLayerNum;
+      } else if (layerName === 'cannabisPermitsConstruction') {
+        mapServiceUrl += '/' + cannabisRetailLayerMapToNumber.underConstructionLayerNum;
+      } else if (layerName === 'mcds') {
+        mapServiceUrl += '/' + cannabisRetailLayerMapToNumber.mcdLayerNum;
+      } else if (layerName === 'schools') {
+        mapServiceUrl += '/' + cannabisRetailLayerMapToNumber.schoolLayerNum;
+      }
+      var query = new Query();
+      var queryTask = new QueryTask(mapServiceUrl);
+      console.log(mapServiceUrl);
+      console.log(id)
+      query.returnGeometry = true;
+      query.outFields = ["*"];
+      query.where = "OBJECTID =" + id    
+      return queryTask.execute(query);
+    }
+
+    function getQueryTaskPromise(url, queryStr, returnGeom, outFields) {
+      var query = new Query();
+      var queryTask = new QueryTask(url);
+      query.returnGeometry = returnGeom;
+      query.outFields = outFields;
+      query.where = queryStr;
+      return queryTask.execute(query);
+    }
+
+    function getAllItemsInsideNeighborhood(neighborhoodFeature) {
+
+      var allCheckboxes = $('input');
+      for (var i = 0; i < allCheckboxes.length; i++) {
+        allCheckboxes[i].checked = true;
+      }
+      var allCheckboxesArr = Array.from(allCheckboxes);
+
+      // var neighborhoodGeometry = neighborhoodFeature[0].geometry;
+      // console.log(cannabisRetailLayerMapToNumber)
+      // console.log(CANNABIS_RETAIL_SERVICE_URL)
+      // var layersToCheckAgainstNeighborhood = [
+      //   new FeatureLayer({
+      //     url: CANNABIS_RETAIL_SERVICE_URL + '/' + cannabisRetailLayerMapToNumber.schoolLayerNum,
+      //   }), 
+      //   new FeatureLayer({
+      //     url: CANNABIS_RETAIL_SERVICE_URL + '/' + cannabisRetailLayerMapToNumber.onHoldLayerNum,
+      //   }), 
+      //   new FeatureLayer({
+      //     url: CANNABIS_RETAIL_SERVICE_URL + '/' + cannabisRetailLayerMapToNumber.processLayerNum,
+      //   }), 
+      //   new FeatureLayer({
+      //     url: CANNABIS_RETAIL_SERVICE_URL + '/' + cannabisRetailLayerMapToNumber.submittedLayerNum,
+      //   }), 
+      //   new FeatureLayer({
+      //     url: CANNABIS_RETAIL_SERVICE_URL + '/' + cannabisRetailLayerMapToNumber.underConstructionLayerNum,
+      //   }), 
+      //   new FeatureLayer({
+      //     url: CANNABIS_RETAIL_SERVICE_URL + '/' + cannabisRetailLayerMapToNumber.approvedLayerNum,
+      //   }),  
+      //   new FeatureLayer({
+      //     url: CANNABIS_RETAIL_SERVICE_URL + '/' + cannabisRetailLayerMapToNumber.mcdLayerNum,
+      //   }),       
+      // ];
+      // console.log(layersToCheckAgainstNeighborhood)
+      // var spatialRelationship = 'contains';
+      // var promiseArr = layersToCheckAgainstNeighborhood.map(function(featureLayer) {
+      //   return runSpatialOnGeometryAndLayer(neighborhoodGeometry, featureLayer, spatialRelationship)
+      // });
+      
+      // Promise.all(promiseArr)
+      // .then(function(response) {
+      //   console.log(response);
+      //   var itemsInsideNeighborhood = response.filter(function(item) {
+      //     return item.features.length !== 0;
+      //   });
+      //   console.log(itemsInsideNeighborhood);
+      // })
+    }
+
     return {
       getView: function () {
         return view;
@@ -1654,14 +1720,79 @@ require(["esri/Map", "esri/views/MapView", "esri/Graphic", "esri/tasks/support/B
       getCurrPopupLocation: function() {
         return currPopupLocation;
       },
+
+      highlightNeighborhoodAndDarkenRest: function(neighborhoodName) {
+        view.graphics = [];
+        var neighborhoodLayerUrl = CANNABIS_RETAIL_SERVICE_URL + '/' + cannabisRetailLayerMapToNumber.neighborhoodLayerNum;
+        var returnGeometry = true;
+        var outFields = ["*"];
+        var queryString = "(1=1)";
+
+        
+        getQueryTaskPromise(neighborhoodLayerUrl, queryString, returnGeometry, outFields)
+        .then(function(response) {
+          var allNeighborhoodFeatures = response.features;
+          var neighborhoodOfInterestIndex;
+          for (var i = 0; i < allNeighborhoodFeatures.length; i++) {
+            var currNeighhoodName = allNeighborhoodFeatures[i].attributes.NEIGHBORHOOD;
+            if (currNeighhoodName === neighborhoodName) {
+              neighborhoodOfInterestIndex = i;
+              break;
+            }
+          }
+
+          var neighborhoodOfInterestFeature = allNeighborhoodFeatures.splice(neighborhoodOfInterestIndex, 1);
+
+          getAllItemsInsideNeighborhood(neighborhoodOfInterestFeature);
+
+
+          var otherNeighborhoodColor = {
+            type: 'simple-fill',
+            color: [33, 33, 35, 0.5],
+            style: 'solid',
+            outline: {
+              color: [33, 33, 35, 0.1],
+              width: 0
+            }
+          };
+
+          var neighboorOfInterestColor = {
+            type: 'simple-fill',
+            color: [33, 33, 35, 0],
+            style: 'solid',
+            outline: {
+              color: [79, 102, 238, 1],
+              width: 2
+            }
+          };
+          var neighborhoodOfInterestGraphic = new Graphic({
+            geometry: neighborhoodOfInterestFeature[0].geometry,
+            symbol: neighboorOfInterestColor
+          });
+          
+          allNeighborhoodFeatures.forEach(function(feature) {
+            var currGeomtry = feature.geometry;
+            var currGraphic = new Graphic({
+              geometry: currGeomtry,
+              symbol: otherNeighborhoodColor
+            });
+            view.graphics.add(currGraphic);
+          });
+          view.graphics.add(neighborhoodOfInterestGraphic);
+        })
+        .catch(function(err) {
+          console.log(err)
+        })
+      },
       
       updateLayerVisibility: function (event) {
+        var checkboxChecked = event.target.checked;
         var superDistLayerNum = cannabisRetailLayerMapToNumber.supervisorDistLayerNum;
         var mapLayerNum = Number(event.target.value);
         var sublayer = mapImageLayer.findSublayerById(parseInt(mapLayerNum));
         var checkBoxChecked = event.target.checked;
         var bufferLayerNum;
-        sublayer.visible = !sublayer.visible;
+        sublayer.visible = checkboxChecked;
 
         var currLayerUrl = CANNABIS_RETAIL_SERVICE_URL + '/' + mapLayerNum;
         var clickedLayer = new FeatureLayer({
@@ -1696,7 +1827,7 @@ require(["esri/Map", "esri/views/MapView", "esri/Graphic", "esri/tasks/support/B
           }
           if (bufferLayerNum) {
             sublayer = mapImageLayer.findSublayerById(parseInt(bufferLayerNum));
-            sublayer.visible = !sublayer.visible;
+            sublayer.visible = checkboxChecked;
           }
         }
       },
@@ -1707,6 +1838,45 @@ require(["esri/Map", "esri/views/MapView", "esri/Graphic", "esri/tasks/support/B
 
       addBufferAroundSearchPolygon: function (geometry) {
         addBufferAroundSearchPolygonHelper(geometry);
+      },
+
+      handleNearbyLocationOptionClick(event) {
+        var targetVal = event.target;
+        var className = event.target.className;
+        var layerName = targetVal.title;
+        var id = targetVal.firstChild.id;
+
+        if (className === 'multiple-location-td__info') {
+          var parentElement = event.target.parentElement;
+          layerName = parentElement.firstChild.title;
+          id = parentElement.firstChild.id;
+        }
+        performSearchQuery(layerName, id)
+        .then(function(response) {
+          var firstFeature = response.features[0];
+          var attributes = firstFeature.attributes;
+          var geometry = attributes.geometry;
+          var polygonColors = {
+            type: 'simple-fill',
+            color: [255, 255, 255, 1],
+            style: 'solid',
+            outline: {
+              color: [0, 0, 0, 1],
+              width: 2
+            }
+          };
+          var pointColor = {
+            type: "simple-marker", // autocasts as new SimpleMarkerSymbol()
+            color: [0, 0, 0, 1],
+            outline: {
+              color: [0, 0, 0, 1],
+              width: 2
+            }
+          } 
+          var tempPolygon = new Polygon(geometry);
+          addPolygonToMap(firstFeature, polygonColors, pointColor);
+          zoomInToSearchPolygon(tempPolygon);
+        })
       },
 
       searchByNameInAttributeTable: function (searchStr, searchAddress, searchType, objectId) {
@@ -1757,9 +1927,9 @@ require(["esri/Map", "esri/views/MapView", "esri/Graphic", "esri/tasks/support/B
 
   var App = function () {
     var GEOCODER_URL = theProtocol + '://sfplanninggis.org/cpc_geocode/?search=';
+    var uiSelectors = UICtrl.getUiSelectors();
 
     function showPopupChoices(searchResponse) {
-      var uiSelectors = UICtrl.getUiSelectors();
       $(uiSelectors.modalHeader).css('background', '#1C3E57');
       $(uiSelectors.closeModal).css('color', 'white');
       var modalHtml = '';
@@ -1878,6 +2048,28 @@ require(["esri/Map", "esri/views/MapView", "esri/Graphic", "esri/tasks/support/B
         });
     }
 
+    function sortByNeighborhoodName(item1, item2) {
+      var attribute1 = item1.attributes["NEIGHBORHOOD"];
+      var attribute2 = item2.attributes["NEIGHBORHOOD"];
+      return attribute1 < attribute2 ? -1 : 1;
+  }
+
+    function popuplateNeighborhoods() {
+      var neighborhoodList = $(uiSelectors.neighborhoodList);
+      var neighborhoodListGetRequestUrl = 'http://sfplanninggis.org/arcgiswa/rest/services/CannabisRetailDev/MapServer/21/query?where=NEIGHBORHOOD+like+%27%25%25%27&text=&objectIds=&time=&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&relationParam=&outFields=&returnGeometry=true&returnTrueCurves=true&maxAllowableOffset=&geometryPrecision=&outSR=&having=&returnIdsOnly=false&returnCountOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&gdbVersion=&historicMoment=&returnDistinctValues=false&resultOffset=&resultRecordCount=&queryByDistance=&returnExtentOnly=false&datumTransformation=&parameterValues=&rangeValues=&quantizationParameters=&featureEncoding=esriDefault&f=json'
+
+      // var queryUrl = plantsfGeocoderUrl + "/query?where=Address+like+%27" + searchStr + "%%27&geometryType=esriGeometryEnvelope&spatialRel=esriSpatialRelIntersects&outFields=Address,Priority&returnGeometry=false&returnTrueCurves=false&returnIdsOnly=false&returnCountOnly=false&returnZ=false&returnM=false&returnDistinctValues=false&resultRecordCount=9&returnExtentOnly=false&f=json"
+
+      $.get(neighborhoodListGetRequestUrl, function(data, status) {
+        var listOfNeighborhoods = data.features;
+        var sortedNeighborhoods = listOfNeighborhoods.sort(sortByNeighborhoodName);
+        sortedNeighborhoods.forEach(function(eachFeature) {
+          var currNeighborhoodHtml = '<li class="each-neighborhood">' + eachFeature.attributes.NEIGHBORHOOD + '</li>'
+          neighborhoodList.append(currNeighborhoodHtml)
+        });        
+      })
+    }
+
     function isOnMobileHelper() {
       var windowWidth = window.innerWidth;
       return windowWidth < 544 ? true : false;
@@ -1886,15 +2078,17 @@ require(["esri/Map", "esri/views/MapView", "esri/Graphic", "esri/tasks/support/B
     function listenForEvents() {
       var uiSelectors = UICtrl.getUiSelectors();
 
-      // submit search box
       $(uiSelectors.searchBox).submit(function (event) {
         callLoadSpinner()
         event.preventDefault();
         var searchString = $('#addressInput').val();
         handleSearching(searchString)
-
       });
 
+      $('input').change(function(event) {
+        console.log('checkbox changeeeeeed')
+        MapCtrl.updateLayerVisibility(event)
+      })
 
       document.addEventListener('click', function (event) {
         var MULTIPLE_BUSINESS_SELECTION_CLASS = 'multiple-business-selection';
@@ -1905,12 +2099,12 @@ require(["esri/Map", "esri/views/MapView", "esri/Graphic", "esri/tasks/support/B
         var clickedBusinessAddress = clickedItemTextContent.split(':')[1];
         var parentElement = event.target.parentElement;
         var parentElementClassName = parentElement.className;
+        var clickedOnMultipleLocationOption = currClassName.indexOf('multiple-location-td') !== -1 || parentElementClassName.indexOf('multiple-location-td__info') !== -1;
 
         if (currClassName.indexOf('btn-search') !== -1 || currClassName.indexOf('fa-search') !== -1 || currClassName.indexOf('input-group-append') !== -1) {
           var searchStr = $('#addressInput').val();
           handleSearching(searchStr);
         }
-
 
         if (currClassName.indexOf('esri-popup__icon esri-icon-close') !== -1) {
           if (isOnMobileHelper()) {
@@ -1918,9 +2112,18 @@ require(["esri/Map", "esri/views/MapView", "esri/Graphic", "esri/tasks/support/B
           }
         }
 
+        if (currClassName.indexOf('each-neighborhood') !== -1) {
+          var neighborhoodName = event.target.innerHTML;
+          MapCtrl.highlightNeighborhoodAndDarkenRest(neighborhoodName);
+        }
+
         if (currClassName.indexOf('show-nearby-locations') !== -1) {
           PopupCtrl.setIsOnMultipleView(true);
           UICtrl.showNearByLocationOnPopup();
+        }
+
+        if (clickedOnMultipleLocationOption) {
+          MapCtrl.handleNearbyLocationOptionClick(event);
         }
 
         var clickedOnListItemInPopup = currClassName.indexOf('esri-popup__feature-menu-item') !== -1 || currClassName.indexOf('esri-popup__feature-menu-title') !== -1 || currClassName.indexOf('esri-icon-check-mark') !== -1 || currClassName.indexOf('esri-popup__feature-menu-title') !== -1 || parentElementClassName.indexOf('esri-popup__feature-menu-title') !== -1;
@@ -1961,9 +2164,9 @@ require(["esri/Map", "esri/views/MapView", "esri/Graphic", "esri/tasks/support/B
         }
 
         // turn layers on/off
-        if (clickedType === 'checkbox') {
-          MapCtrl.updateLayerVisibility(event)
-        }
+        // if (clickedType === 'checkbox') {
+        //   MapCtrl.updateLayerVisibility(event)
+        // }
       })
     }
 
@@ -1977,6 +2180,7 @@ require(["esri/Map", "esri/views/MapView", "esri/Graphic", "esri/tasks/support/B
           UICtrl.listenForScrollingForLocationMenu();
           UICtrl.listenForLegendAccordionToggle();
           UICtrl.listenForMobileAlert();
+          popuplateNeighborhoods();
         })
         if (this.isOnMobile()) {
           $('#addressInput')[0].placeholder = 'Search';

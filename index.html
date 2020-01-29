@@ -28,6 +28,9 @@
     <link rel="stylesheet" href="https://js.arcgis.com/4.12/esri/css/main.css">
     <script src="https://js.arcgis.com/4.12/"></script>
 
+    <!-- <link rel="stylesheet" href="https://js.arcgis.com/4.14/esri/themes/light/main.css">
+    <script src="https://js.arcgis.com/4.14/"></script> -->
+
     <!-- style sheet -->
     <link rel="stylesheet" href="style/style.css">
 
@@ -309,9 +312,7 @@
                         </div>
                     </div>
                     <div class="custom-control custom-checkbox">
-
                         &nbsp;
-
                         <div class="pin" id="underConstructionPin"></div>
                         <input type="checkbox" class="list_item custom-control-input " id="underConstruction" value="7">
                         <label class="custom-control-label" for="underConstruction">Location under construction</label>
@@ -319,9 +320,7 @@
                             aria-controls="under-construction-description">
                         </a>
                         <div class="collapse permit-description" id="under-construction-description">
-
                             SF Planning has approved land use, business is being built out
-
                         </div>
                     </div>
                     <div class="custom-control custom-checkbox">
@@ -333,9 +332,7 @@
                         <a class="accordion-toggle collapsed" data-toggle="collapse" href="#approved-description" aria-expanded="false" aria-controls="approved-description">
                         </a>
                         <div class="collapse permit-description" id="approved-description">
-
                             Business is allowed to operate
-
                         </div>
                     </div>
                     <div class="custom-control custom-checkbox">
@@ -374,6 +371,21 @@
                         <input type="checkbox" class="list_item custom-control-input" id="supervisor-district" value="2">
                         <label class="custom-control-label" for="supervisor-district" style="margin-left: 11px">Supervisor Districts (1-11)</label>
                     </div>
+                    <div class="custom-control custom-checkbox">
+                        <div class="" style="margin-left: 33px">
+                            <img src="images/neighborhood.svg" width="22" height="14">
+                            <label class="custom-control-label" for="approved">Permit approved</label>
+                            <a class="accordion-toggle collapsed" data-toggle="collapse" href="#neighborhood" aria-expanded="false" aria-controls="neighborhood">
+                            </a>
+                        </div>                        
+                        <input type="checkbox" class="list_item custom-control-input " id="approved" value="6">
+
+                        <div class="collapse permit-description" id="neighborhood">
+                            <ul id="neighborhood-list">
+                            </ul>
+                        </div>
+                    </div>
+
                     <!-- <div class="custom-control custom-checkbox">
                         <div class="pin" style="margin-right: 0; margin-left: 35px" id="super-dist">1</div><input
                             type="checkbox" class="list_item custom-control-input" id="super-district" value="2">
