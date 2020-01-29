@@ -1,5 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+"http://www.w3.org/TR/html4/strict.dtd"><html lang="en">
 
 <head>
     <meta charset="UTF-8">
@@ -27,6 +27,9 @@
     <!-- ArcGIS API -->
     <link rel="stylesheet" href="https://js.arcgis.com/4.12/esri/css/main.css">
     <script src="https://js.arcgis.com/4.12/"></script>
+
+    <!-- <link rel="stylesheet" href="https://js.arcgis.com/4.14/esri/themes/light/main.css">
+    <script src="https://js.arcgis.com/4.14/"></script> -->
 
     <!-- style sheet -->
     <link rel="stylesheet" href="style/style.css">
@@ -154,7 +157,7 @@
                             <div class="pin" id="submittedPin">
 
                             </div>
-                            <input type="checkbox" class="list_item custom-control-input" id="submitted-desktop" value="7">
+                            <input type="checkbox" class="list_item custom-control-input" id="submitted-desktop" value="5">
                             <label class="custom-control-label" for="submitted-desktop">Application submitted</label>
                             <a class="accordion-toggle collapsed" data-toggle="collapse" href="#submitted-description-mobile" aria-expanded="false" aria-controls="submitted-description-mobile">
                             </a>
@@ -169,16 +172,13 @@
                             &nbsp;
 
                             <div class="pin" id="processingPin"></div>
-                            <input type="checkbox" class="list_item custom-control-input " id="processing-desktop" value="5">
+                            <input type="checkbox" class="list_item custom-control-input " id="processing-desktop" value="4">
                             <label class="custom-control-label" for="processing-desktop">Application processing</label>
                             <a class="accordion-toggle collapsed" data-toggle="collapse" href="#processing-description-mobile" aria-expanded="false"
                                 aria-controls="processing-description-mobile">
                             </a>
                             <div class="collapse permit-description" id="processing-description-mobile">
-
                                 City is reviewing application
-
-
                             </div>
                         </div>
                         <div class="custom-control custom-checkbox">
@@ -186,7 +186,7 @@
                             &nbsp;
 
                             <div class="pin" id="underConstructionPin"></div>
-                            <input type="checkbox" class="list_item custom-control-input " id="underConstruction-desktop" value="9">
+                            <input type="checkbox" class="list_item custom-control-input " id="underConstruction-desktop" value="7">
                             <label class="custom-control-label" for="underConstruction-desktop">Location under construction</label>
                             <a class="accordion-toggle collapsed" data-toggle="collapse" href="#under-construction-description-mobile" aria-expanded="false"
                                 aria-controls="under-construction-description-mobile">
@@ -201,7 +201,7 @@
                             &nbsp;
 
                             <div class="pin" id="approvedPin"></div>
-                            <input type="checkbox" class="list_item custom-control-input " id="approved-desktop" value="11">
+                            <input type="checkbox" class="list_item custom-control-input " id="approved-desktop" value="6">
                             <label class="custom-control-label" for="approved-desktop">Permit approved</label>
                             <a class="accordion-toggle collapsed" data-toggle="collapse" href="#approved-description-mobile" aria-expanded="false" aria-controls="approved-description-mobile">
                             </a>
@@ -295,7 +295,7 @@
                         <div class="pin" id="submittedPin">
 
                         </div>
-                        <input type="checkbox" class="list_item custom-control-input" id="submitted" value="7">
+                        <input type="checkbox" class="list_item custom-control-input" id="submitted" value="5">
                         <label class="custom-control-label" for="submitted">Application submitted</label>
                         <a class="accordion-toggle collapsed" data-toggle="collapse" href="#submitted-description" aria-expanded="false" aria-controls="submitted-description">
                         </a>
@@ -310,7 +310,7 @@
                         &nbsp;
 
                         <div class="pin" id="processingPin"></div>
-                        <input type="checkbox" class="list_item custom-control-input " id="processing" value="5">
+                        <input type="checkbox" class="list_item custom-control-input " id="processing" value="4">
                         <label class="custom-control-label" for="processing">Application processing</label>
                         <a class="accordion-toggle collapsed" data-toggle="collapse" href="#processing-description" aria-expanded="false" aria-controls="processing-description">
                         </a>
@@ -320,33 +320,27 @@
                         </div>
                     </div>
                     <div class="custom-control custom-checkbox">
-
                         &nbsp;
-
                         <div class="pin" id="underConstructionPin"></div>
-                        <input type="checkbox" class="list_item custom-control-input " id="underConstruction" value="9">
+                        <input type="checkbox" class="list_item custom-control-input " id="underConstruction" value="7">
                         <label class="custom-control-label" for="underConstruction">Location under construction</label>
                         <a class="accordion-toggle collapsed" data-toggle="collapse" href="#under-construction-description" aria-expanded="false"
                             aria-controls="under-construction-description">
                         </a>
                         <div class="collapse permit-description" id="under-construction-description">
-
                             SF Planning has approved land use, business is being built out
-
                         </div>
                     </div>
                     <div class="custom-control custom-checkbox">
                         &nbsp;
 
                         <div class="pin" id="approvedPin"></div>
-                        <input type="checkbox" class="list_item custom-control-input " id="approved" value="11">
+                        <input type="checkbox" class="list_item custom-control-input " id="approved" value="6">
                         <label class="custom-control-label" for="approved">Permit approved</label>
                         <a class="accordion-toggle collapsed" data-toggle="collapse" href="#approved-description" aria-expanded="false" aria-controls="approved-description">
                         </a>
                         <div class="collapse permit-description" id="approved-description">
-
                             Business is allowed to operate
-
                         </div>
                     </div>
                     <div class="custom-control custom-checkbox">
@@ -355,7 +349,7 @@
 
                         <div class="pin" id="onHoldPin"></div>
                         <input type="checkbox" class="list_item custom-control-input " id="onHold" value="3">
-                        <label class="custom-control-label" for="onHold">Applcation on hold</label>
+                        <label class="custom-control-label" for="onHold">Application on hold</label>
                         <a class="accordion-toggle collapsed" data-toggle="collapse" href="#on-hold-description" aria-expanded="false" aria-controls="on-hold-description">
                         </a>
                         <div class="collapse permit-description" id="on-hold-description">Currently not progressing with permit</div>
@@ -382,9 +376,24 @@
                         <div class="" style="margin-left: 33px">
                             <img src="images/supervisor.svg" width="22" height="14">
                         </div>
-                        <input type="checkbox" class="list_item custom-control-input" id="schools" value="15">
-                        <label class="custom-control-label" for="schools" style="margin-left: 11px">Supervisor Districts (1-11)</label>
+                        <input type="checkbox" class="list_item custom-control-input" id="supervisor-district" value="2">
+                        <label class="custom-control-label" for="supervisor-district" style="margin-left: 11px">Supervisor Districts (1-11)</label>
                     </div>
+                    <div class="custom-control custom-checkbox">
+                        <div class="" style="margin-left: 33px">
+                            <img src="images/neighborhood.svg" width="22" height="14">
+                            <label class="custom-control-label" for="approved">Permit approved</label>
+                            <a class="accordion-toggle collapsed" data-toggle="collapse" href="#neighborhood" aria-expanded="false" aria-controls="neighborhood">
+                            </a>
+                        </div>                        
+                        <input type="checkbox" class="list_item custom-control-input " id="approved" value="6">
+
+                        <div class="collapse permit-description" id="neighborhood">
+                            <ul id="neighborhood-list">
+                            </ul>
+                        </div>
+                    </div>
+
                     <!-- <div class="custom-control custom-checkbox">
                         <div class="pin" style="margin-right: 0; margin-left: 35px" id="super-dist">1</div><input
                             type="checkbox" class="list_item custom-control-input" id="super-district" value="2">
@@ -398,7 +407,7 @@
                     <a href="https://sfplanning.org/location-and-hours" target="_blank">Contact SF Planning
                     </a> to confirm eligibility of location
                 </div>
-                <div class="list-view" style="padding-left: 20px">
+                <div class="list-view" style="margin: 0px 20px">
                     <a id="list-view-link" href="https://officeofcannabis.sfgov.org/retail/proposed-locations">See list view</a>
                 </div>
             </div>
