@@ -45,10 +45,7 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
     return {
 
       getGeocoderResponse: function (searchString) {
-<<<<<<< HEAD
-=======
         console.log('in get geocoder response func');
->>>>>>> eb303f8d0f49051a5b8cbdd4b4a51247b981d21f
         var geocodeUrl = GEOCODER_URL + searchString;
         return $.get(geocodeUrl)
           .then(function (response) {
@@ -718,10 +715,9 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
     }
 
     function isLayerTurnedOn(layerName) {
-<<<<<<< HEAD
       console.log('checking if certan layer is on');
-=======
->>>>>>> eb303f8d0f49051a5b8cbdd4b4a51247b981d21f
+
+
       var layerToCheck = mapImageLayer.allSublayers.items.filter(function (layer) {
         return layer.title === layerName
       });
@@ -747,11 +743,10 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
         cannabisRetailLayerMapToNumber.parcelLabelLayerNum,
         // cannabisRetailLayerMapToNumber.cannabisLocationsLayer
 
-<<<<<<< HEAD
         // cannabisRetailLayerMapToNumber.CANNABIS_PERMITTED_LAYER_NUM,
         // cannabisRetailLayerMapToNumber.CANNABIS_PERMITTED_WITHCU_LAYER_NUM,
         // cannabisRetailLayerMapToNumber.CANNABIS_PERMITTED_WITH_MICROBUSINESS_LAYER_NUM,
-=======
+
         cannabisRetailLayerMapToNumber.CANNABIS_PERMITTED_LAYER_NUM,
         cannabisRetailLayerMapToNumber.CANNABIS_PERMITTED_WITHCU_LAYER_NUM,
         cannabisRetailLayerMapToNumber.CANNABIS_PERMITTED_WITH_MICROBUSINESS_LAYER_NUM,
@@ -761,7 +756,7 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
         cannabisRetailLayerMapToNumber.cannabisLocationsLayer,
 
 
->>>>>>> eb303f8d0f49051a5b8cbdd4b4a51247b981d21f
+
       ];
       identifyParams.layerOption = 'all';
       identifyParams.width = view.width;
@@ -775,7 +770,6 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
         .execute(identifyParams)
         .then(function (response) {
           console.log(response)
-<<<<<<< HEAD
           var clickedOnParcel = false;
           var searchPopupHtml;
           var permitStatus;
@@ -848,7 +842,7 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
           //   });
           // });
         });
-=======
+
           map.remove(polygonLayerAddedToMap)
 
           var mcdLayerOn = isLayerTurnedOn('MCDs');
@@ -939,7 +933,7 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
         document.getElementById("map").style.cursor = "auto";
           // document.getElementById("map").style.cursor = "auto";
         }
->>>>>>> eb303f8d0f49051a5b8cbdd4b4a51247b981d21f
+
     }
 
     /* 
@@ -1032,10 +1026,9 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
 
       if (isCannabisPermit) {
         var permitType = attributes.PermitStatus;
-<<<<<<< HEAD
         console.log('is permit type');
-=======
->>>>>>> eb303f8d0f49051a5b8cbdd4b4a51247b981d21f
+
+
         var divId = permitTypeMapping[permitType].divId;
         dbaName = attributes.dba_name;
         address = attributes.address;
@@ -1059,13 +1052,12 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
         </table>
         `
       } else if (isMcd) {
-<<<<<<< HEAD
         console.log('is mcd')
         dbaName = attributes.dba;
         address = attributes.address;
         popupHtml +=
           `
-=======
+
         dbaName = attributes.DBA || attributes.dba;
         address = attributes.Address || attributes.address;
         popupHtml +=
@@ -1073,7 +1065,7 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
         <div class="cannabis-permit-container">
           <div class="cannabis-permit" id="mcd">Existing medical cannabis dispensaries</div>
         </div>
->>>>>>> eb303f8d0f49051a5b8cbdd4b4a51247b981d21f
+
         <div class="align-left retail-name"> ${dbaName} </div>
         <div class="align-left retail-address"> ${address} </div>
         <table class="status-section" >
@@ -1085,12 +1077,11 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
         `
       } else if (!isMcd && !isCannabisPermit) {
         var address = attributes.ADDRESS || attributes.ADDRESSSIMPLE;
-<<<<<<< HEAD
-=======
+
         if (!address) {
           address = attributes.mapblklot;
         }
->>>>>>> eb303f8d0f49051a5b8cbdd4b4a51247b981d21f
+
         popupHtml +=
         `
           <div class="align-left retail-name"> ${address} </div>
@@ -1316,7 +1307,6 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
       console.log(jsonData)
       console.log(searchType)
       map.remove(polygonLayerAddedToMap)
-<<<<<<< HEAD
 
       var negativeBufferedGeometry;
       var NEGATIVE_BUFFER_DISTANCE_IN_FEET = -0.2;
@@ -1468,8 +1458,8 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
       var featuresFromJsonResponse = [jsonData.features[0]];
       var featureAttributes = jsonData.features[0].attributes;
       var permitStatus = featureAttributes.PermitStatus;
-=======
->>>>>>> eb303f8d0f49051a5b8cbdd4b4a51247b981d21f
+
+
 
       var negativeBufferedGeometry;
       var NEGATIVE_BUFFER_DISTANCE_IN_FEET = -0.2;
@@ -1498,7 +1488,6 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
         correctedFieldsToUse.forEach(function (eachField) {
           eachField.type = 'string';
         });
-<<<<<<< HEAD
         var parcelNum = featureAttributes.blklot;
 
         searchParcelIsCannabisPermit(parcelNum).then(function (response) {
@@ -1520,7 +1509,7 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
       if (nameOfCannabisRetail) {
         // assign labeling if it is a cannabis permit
         tempSearchLayerToAddToMap.labelingInfo = labelingSetupInfo;
-=======
+
       }
       featuresFromJsonResponse = [jsonData.features[0]];
       
@@ -1532,7 +1521,7 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
         mapBlockLotNum = firstResultAttributes.parcelToGeocode;
       } else {
         mapBlockLotNum = firstResultAttributes.blklot;
->>>>>>> eb303f8d0f49051a5b8cbdd4b4a51247b981d21f
+
       }
       
       // negativeBufferedGeometry = geometryEngine.geodesicBuffer(tempPolygon, NEGATIVE_BUFFER_DISTANCE_IN_FEET, "feet");
@@ -1552,7 +1541,6 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
       map.add(polygonLayerAddedToMap);
       zoomInToSearchPolygon(tempPolygonHolder);
 
-<<<<<<< HEAD
       getInsideWhatZoning(negativeBufferedGeometry).then(function (insideWhatZoning) {
         // check what zoning it is in. 
         // the scenarios are that it can either be mcd, cannabis, permit, or regular parcel. display appropriate popup depending on scenario
@@ -1567,9 +1555,9 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
         }
         PopupCtrl.showPopup(view, tempPolygonHolder, searchPopupHtml)
       });
-=======
+
       cancelSpinner();
->>>>>>> eb303f8d0f49051a5b8cbdd4b4a51247b981d21f
+
 
       if (view.popup.visible) {
         var popupVisible = true;
@@ -1605,9 +1593,8 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
                 )
               });
 
-<<<<<<< HEAD
       */
-=======
+
               mcdFeatures.forEach(function(feature) {
                 var currMcdAttribute = feature.attributes;
                 var currMcdHtml = getPopupForSearch(true, false, currMcdAttribute, zoningLayer);
@@ -1694,7 +1681,7 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
           });
         });
       });
->>>>>>> eb303f8d0f49051a5b8cbdd4b4a51247b981d21f
+
     }
 
     return {
@@ -1798,13 +1785,12 @@ require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer", "esri/lay
     var GEOCODER_URL = theProtocol + '://sfplanninggis.org/cpc_geocode/?search=';
 
     function showPopupChoices(searchResponse) {
-<<<<<<< HEAD
       console.log('in show popup choice function');
-=======
+
       var uiSelectors = UICtrl.getUiSelectors();
       $(uiSelectors.modalHeader).css('background', '#1C3E57');
       $(uiSelectors.closeModal).css('color', 'white');
->>>>>>> eb303f8d0f49051a5b8cbdd4b4a51247b981d21f
+
       var modalHtml = '';
       var featureNum = searchResponse.features.length;
       var multipleResultTitleStr = 'Multiple Results - Please select one';
@@ -2087,11 +2073,10 @@ function highLightTabClicked(event) {
   var legendAlreadySelected = event.classList.contains('selected')
   if (legendAlreadySelected) {
     var nonActiveLogoSrc = imageSrc.replace('-active', '');
-<<<<<<< HEAD
     console.log(nonActiveLogoSrc);
     console.log(imageId)
-=======
->>>>>>> eb303f8d0f49051a5b8cbdd4b4a51247b981d21f
+
+
     $('#' + imageId).attr('src', nonActiveLogoSrc);
     $('.tab-display-container').css('display', 'none');
     event.classList.remove('selected');
@@ -2107,10 +2092,9 @@ function highLightTabClicked(event) {
 }
 
 function showLegendOnMobileTab() {
-<<<<<<< HEAD
   console.log('in legend')
-=======
->>>>>>> eb303f8d0f49051a5b8cbdd4b4a51247b981d21f
+
+
   $('#mobile-legend').css('display', 'block');
   $('#filter-container').css('display', 'none');
   $('#legend-logo').attr('src', 'images/legend-active.svg');
@@ -2118,10 +2102,9 @@ function showLegendOnMobileTab() {
 }
 
 function showFilterOnMobileTab() {
-<<<<<<< HEAD
   console.log('in filter')
-=======
->>>>>>> eb303f8d0f49051a5b8cbdd4b4a51247b981d21f
+
+
   $('#mobile-legend').css('display', 'none');
   $('#filter-container').css('display', 'block');
   $('#locations-logo').attr('src', 'images/Location-active.svg')
